@@ -1,15 +1,15 @@
-#include "mat_t.h"
+#include "mat.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 
-static FLT_TYPE rnd(void)
+static FLT_TYP rnd(void)
 {
-    return 2*rand()/(FLT_TYPE)RAND_MAX - 1;
+    return 2*rand()/(FLT_TYP)RAND_MAX - 1;
 }
 
-static inline FLT_TYPE* arr_lin_fill(FLT_TYPE* arr, FLT_TYPE start, FLT_TYPE end, size_t sz)
+static inline FLT_TYP* arr_lin_fill(FLT_TYP* arr, FLT_TYP start, FLT_TYP end, IND_TYP sz)
 {
     if (!arr || sz == 0)
         return arr;
@@ -19,17 +19,17 @@ static inline FLT_TYPE* arr_lin_fill(FLT_TYPE* arr, FLT_TYPE start, FLT_TYPE end
         arr[0] = start;
         return arr;
     }
-    FLT_TYPE dlt = (end - start) / (sz-1);
-    for(size_t i = 0; i < sz; i++)
+    FLT_TYP dlt = (end - start) / (sz-1);
+    for(IND_TYP i = 0; i < sz; i++)
         arr[i] = start + i * dlt;
     return arr;
 }
 
 void mat_transposition_test(void)
 {
-    FLT_TYPE arr[6] = {11, 12, 13, 21, 22, 23};
+    FLT_TYP arr[6] = {11, 12, 13, 21, 22, 23};
     mat_t m = mat_NULL;
-    mat_init(&m, arr, 2, 3);
+    mat_init_prealloc(&m, arr, 2, 3);
     
     mat_t *r = mat_new(3, 2);
     char str_bf[1024] = {0};

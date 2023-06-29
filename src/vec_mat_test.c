@@ -15,14 +15,14 @@ void vec_mat_test(void)
 
     mat_construct(&m, 2, 3);
 
-    FLT_TYPE vr_arr[3] = {1, -1, 2};
-    FLT_TYPE vl_arr[2] = {-1, 2};
-    FLT_TYPE res_2_arr[2] = {0};
-    FLT_TYPE res_3_arr[3] = {0};
-    vec_init(&vr, vr_arr, 3);
-    vec_init(&vl, vl_arr, 2);
-    vec_init(&res_2, res_2_arr, 2);
-    vec_init(&res_3, res_3_arr, 3);
+    FLT_TYP vr_arr[3] = {1, -1, 2};
+    FLT_TYP vl_arr[2] = {-1, 2};
+    FLT_TYP res_2_arr[2] = {0};
+    FLT_TYP res_3_arr[3] = {0};
+    vec_init_prealloc(&vr, vr_arr, 3);
+    vec_init_prealloc(&vl, vl_arr, 2);
+    vec_init_prealloc(&res_2, res_2_arr, 2);
+    vec_init_prealloc(&res_3, res_3_arr, 3);
 
     for(int i = 0; i < 6; i++)
         m.arr[i] = i + 1;
@@ -38,9 +38,9 @@ void vec_mat_test(void)
     printf("res m@vr:\n%s\n", vec_to_str(&res_2, buff));
     printf("res vl@m:\n%s\n", vec_to_str(&res_3, buff));
 
-    FLT_TYPE m2_arr[6] = {0};
+    FLT_TYP m2_arr[6] = {0};
     mat_t m2 = mat_NULL;
-    mat_init(&m2, m2_arr, 2, 3);
+    mat_init_prealloc(&m2, m2_arr, 2, 3);
     vec_outer(&m2, &vl, &vr);
     printf("outer vl*vr:\n%s\n", mat_to_str(&m2, buff));
     

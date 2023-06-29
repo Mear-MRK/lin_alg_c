@@ -1,15 +1,15 @@
-#include "vec_t.h"
+#include "vec.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 
-static FLT_TYPE rnd(void)
+static FLT_TYP rnd(void)
 {
-    return 2*rand()/(FLT_TYPE)RAND_MAX - 1;
+    return 2*rand()/(FLT_TYP)RAND_MAX - 1;
 }
 
-static inline FLT_TYPE* arr_lin_fill(FLT_TYPE* arr, FLT_TYPE start, FLT_TYPE end, size_t sz)
+static inline FLT_TYP* arr_lin_fill(FLT_TYP* arr, FLT_TYP start, FLT_TYP end, IND_TYP sz)
 {
     if (!arr || sz == 0)
         return arr;
@@ -19,17 +19,17 @@ static inline FLT_TYPE* arr_lin_fill(FLT_TYPE* arr, FLT_TYPE start, FLT_TYPE end
         arr[0] = start;
         return arr;
     }
-    FLT_TYPE dlt = (end - start) / (sz-1);
-    for(size_t i = 0; i < sz; i++)
+    FLT_TYP dlt = (end - start) / (sz-1);
+    for(IND_TYP i = 0; i < sz; i++)
         arr[i] = start + i * dlt;
     return arr;
 }
 
 static vec_t *vec_sigmoid_alt(vec_t *result, const vec_t *v)
 {
-    vec_tanh(result, vec_sclmul(result, v, (FLT_TYPE)0.5));
+    vec_tanh(result, vec_sclmul(result, v, (FLT_TYP)0.5));
     vec_f_addto(result, 1);
-    vec_scale(result, (FLT_TYPE)0.5);
+    vec_scale(result, (FLT_TYP)0.5);
     return result;
 }
 
@@ -49,7 +49,7 @@ static void sigmoid_test(void)
     printf("clk_s: %ld\n", CLOCKS_PER_SEC);
     for(int r = 0; r < 10000; r++)
     {
-        vec_rnd_fill(&v, rnd);
+        vec_fill_rnd(&v, rnd);
         vec_assign(&sv, &v);
         vec_assign(&sv2, &v);
         start = clock();
@@ -113,7 +113,7 @@ void fill_vec_test(void)
     printf("    fill: %g\n", (end-start)/(double)CLOCKS_PER_SEC);
     start = clock();
     for(float f = 0; f < 1000000; f+=1.0001)
-        vec_fill_alt(&v2, f);
+        vec_fill_altimp(&v2, f);
     end = clock();
     printf("rec_fill: %g\n", (end-start)/(double)CLOCKS_PER_SEC);
 
@@ -140,8 +140,8 @@ void vec_test(void)
     vec_t* vr = vec_new(3);
 
 
-    vec_init(&va, a_arr, 3);
-    vec_init(&vb, b_arr, 3);
+    vec_init_prealloc(&va, a_arr, 3);
+    vec_init_prealloc(&vb, b_arr, 3);
 
     printf("va: %s, norm2: %g, norm1: %g, sum: %g\n", vec_to_str(&va, str_buff)
         , vec_norm_2(&va), vec_norm_1(&va), vec_sum(&va));
