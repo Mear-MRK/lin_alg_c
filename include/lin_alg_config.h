@@ -4,6 +4,11 @@
 #include <stddef.h>
 #include <stdint.h>
 
+// #define FLT32 32
+// #define FLT64 64
+// #define INT32 32
+// #define INT64 64
+
 #ifndef FEILD_T
 #define FEILD_T FLT32
 #endif

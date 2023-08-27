@@ -47,7 +47,7 @@ mat_t *mat_init_prealloc(mat_t *m, FLT_TYP arr[], IND_TYP d1, IND_TYP d2)
     assert(arr);
     assert(d1 > 0 && d2 > 0);
 
-    if (!m || !mat_is_null(m) || d1 <= 0 || d2 <= 0)
+    if (!m || d1 <= 0 || d2 <= 0)
         return m;
     
     m->size = d1 * d2;
@@ -127,6 +127,19 @@ char *mat_to_str(const mat_t *m, char *m_str)
     }
     strcat(m_str, "]");
     return m_str;
+}
+
+mat_t *mat_update(mat_t *m_trg, FLT_TYP alpha, const mat_t *m_right)
+{
+    assert(m_trg);
+    assert(m_right);
+    assert(m_trg->arr && m_right->arr);
+    assert(m_trg->d1 == m_right->d1);
+    assert(m_trg->d2 == m_right->d2);
+
+    AXPY(m_trg->size, alpha, m_right->arr, 1, m_trg->arr, 1);
+    
+    return m_trg;
 }
 
 mat_t *mat_mul(mat_t *result, const mat_t *m_left, const mat_t *m_right)

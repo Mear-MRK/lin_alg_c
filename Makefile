@@ -9,8 +9,8 @@ EXT_INCPATH = /usr/include/mkl
 EXT_LIBPATH = /usr/lib/x86_64-linux-gnu
 
 DESTPATH = ${HOME}
-LIBINSTPATH = ${DESTPATH}/lib/${PRJNAME}
-INCINSTPATH = ${DESTPATH}/include/${PRJNAME}
+LIBINSTPATH = ${DESTPATH}/lib
+INCINSTPATH = ${DESTPATH}/include
 
 RLS_FLT32_LIB = $(PRJNAME)_flt32
 RLS_FLT64_LIB = $(PRJNAME)_flt64
@@ -21,14 +21,14 @@ CC = gcc
 LD = gcc
 AR = ar
 
-COM_CFLAGS = -std=c11 -Wall -Wextra -I$(INCPATH) -I$(EXT_INCPATH) -DINDEX_T=IND32
+COM_CFLAGS = -std=c11 -Wall -Wextra -I$(INCPATH) -I$(EXT_INCPATH) -DINDEX_T=INT32
 OPT_CFLAGS = -flto -O3
 
 RLS_CFLAGS = -DNDEBUG $(COM_CFLAGS) $(OPT_CFLAGS)
 RLS_LDFLAGS = $(OPT_CFLAGS) -L$(LIBPATH) -L$(EXT_LIBPATH)
 DBG_CFLAGS = -DDEBUG -g $(COM_CFLAGS) 
 DBG_LDFLAGS = -L$(LIBPATH) -L$(EXT_LIBPATH) -g
-LD_LIBS = -lmkl_rt
+LD_LIBS = -lmkl_rt -lm # -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -lpthread -lm -ldl
 
 CFILES = $(wildcard $(SRCPATH)/*.c)
 HFILES = $(wildcard $(INCPATH)/*.h)

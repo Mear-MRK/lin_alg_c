@@ -64,6 +64,8 @@ mat_t *mat_fill(mat_t *m, FLT_TYP value);
 // mat_t *mat_diag_init(mat_t *m, const vec_t *v);
 
 char *mat_to_str(const mat_t *m, char *str_buff);
+// trg += alpha * m_right
+mat_t *mat_update(mat_t *trg, FLT_TYP alpha, const mat_t* m_right);
 
 
 #ifdef __cplusplus

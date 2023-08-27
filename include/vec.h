@@ -47,9 +47,7 @@ vec_t* vec_construct(vec_t* v, IND_TYP size);
 void vec_destruct(vec_t* v);
 
 /* 
- * Initializes v with pre-allocated arr.
- * v must not already be constructed/initialized
- * and it must be vec_NULL. Freeing v->arr at the end
+ * Initializes v with pre-allocated arr. Freeing v->arr at the end
  * of its lifetime is the responsibility of the dev/user.
  */
 vec_t* vec_init_prealloc(vec_t* v, FLT_TYP* arr, IND_TYP size);
@@ -111,8 +109,12 @@ vec_t* vec_subfrom(vec_t* v_dst, const vec_t* v_right);
 vec_t* vec_mulby(vec_t* v_dst, const vec_t* v_right);
 // v += f
 vec_t* vec_f_addto(vec_t* v, FLT_TYP f);
+// result = f - v_right
+vec_t* vec_f_sub(vec_t* result, FLT_TYP f, const vec_t* v_right);
 // v *= scale
 vec_t* vec_scale(vec_t* v, FLT_TYP scale);
+// v_dst += alpha * v_right
+vec_t* vec_update(vec_t* v_dst, FLT_TYP alpha, const vec_t* v_right);
 // v_left @ v_right : @ = dot product
 FLT_TYP vec_dot(const vec_t* v_left, const vec_t* v_right);
 // Euclidean norm of v : sqrt(sum_i v->arr[i]^2)
@@ -121,6 +123,10 @@ FLT_TYP vec_norm_2(const vec_t* v);
 FLT_TYP vec_norm_1(const vec_t* v);
 // Sum of elements of v
 FLT_TYP vec_sum(const vec_t* v);
+// Sign of elements of v
+vec_t* vec_sign(vec_t* result, const vec_t* v);
+// Theta: step function
+vec_t *vec_theta(vec_t *result, const vec_t *v);
 
 /* NOT implemented yet.
 FLT_TYP vec_mean(const vec_t* v);

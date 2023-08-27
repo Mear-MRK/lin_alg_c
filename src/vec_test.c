@@ -91,8 +91,9 @@ void relu_test(void)
     
     printf("v:       %s\n", vec_to_str(v, str_bf));
     printf("relu(v): %s\n", vec_to_str(vec_relu(r, v), str_bf));
-    
-    
+    printf("sign(v): %s\n", vec_to_str(vec_sign(r, v), str_bf));
+    printf("theta(v): %s\n", vec_to_str(vec_theta(r, v), str_bf));
+
     vec_del(r);
     vec_del(v);
     puts("--------");

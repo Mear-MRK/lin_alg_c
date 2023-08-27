@@ -41,7 +41,7 @@ void vec_destruct(vec_t *v)
 vec_t *vec_init_prealloc(vec_t *v, FLT_TYP *arr, IND_TYP size)
 {
     assert(v);
-    if (v && vec_is_null(v) && size > 0)
+    if (v && size > 0)
     {
         v->size = size;
         v->arr = arr;
@@ -181,7 +181,7 @@ vec_t *vec_sclmul(vec_t *result, const vec_t *v, FLT_TYP alpha)
     assert(v->size == result->size);
     // vec_fill_zero(result);
     // AXPY(v->size, alpha, v->arr, 1, result->arr, 1);
-    vsMulI(v->size, v->arr, 1, &alpha, 0, result->arr, 1);
+    VMULI(v->size, v->arr, 1, &alpha, 0, result->arr, 1);
     return result;
 }
 
@@ -193,12 +193,32 @@ vec_t *vec_f_addto(vec_t *v, FLT_TYP f)
     return v;
 }
 
+vec_t *vec_f_sub(vec_t *result, FLT_TYP f, const vec_t *v_right)
+{
+    assert(v_right);
+    assert(result);
+    assert(v_right->size == result->size);
+    VSUBI(result->size, &f, 0, v_right->arr, 1, result->arr, 1);
+    return result;
+}
+
 vec_t *vec_scale(vec_t *v, FLT_TYP scale)
 {
     assert(v);
     assert(v->arr);
     SCAL(v->size, scale, v->arr, 1);
     return v;
+}
+
+vec_t *vec_update(vec_t *v_dst, FLT_TYP alpha, const vec_t *v_right)
+{
+    assert(v_dst);
+    assert(v_right);
+    assert(v_dst->arr && v_right->arr);
+    assert(v_dst->size == v_right->size);
+
+    AXPY(v_dst->size, alpha, v_right->arr, 1, v_dst->arr, 1);
+    return v_dst;
 }
 
 vec_t *vec_exp(vec_t *result, const vec_t *v)
@@ -295,6 +315,27 @@ FLT_TYP vec_sum(const vec_t *v)
     assert(v->arr);
     FLT_TYP one = 1;
     return DOT(v->size, v->arr, 1, &one, 0);
+}
+
+vec_t *vec_sign(vec_t *result, const vec_t *v)
+{
+    assert(result);
+    assert(v);
+    assert(result->size == v->size);
+    FLT_TYP one = 1;
+    VCOPYSIGNI(v->size, &one, 0, v->arr, 1, result->arr, 1);
+    return result;
+}
+
+vec_t *vec_theta(vec_t *result, const vec_t *v)
+{
+    assert(result);
+    assert(v);
+    assert(result->size == v->size);
+    FLT_TYP half = 0.5;
+    VCOPYSIGNI(v->size, &half, 0, v->arr, 1, result->arr, 1);
+    vec_f_addto(result, 0.5);
+    return result;
 }
 
 FLT_TYP vec_dot(const vec_t *v_1, const vec_t *v_2)

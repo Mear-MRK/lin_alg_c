@@ -19,15 +19,17 @@
 #define ASUM cblas_sasum
 #define NRM2 cblas_snrm2
 #define VMUL vsMul
+#define VMULI vsMulI
 #define VADD vsAdd
 #define VSUB vsSub
+#define VSUBI vsSubI
 #define VEXP vsExp
 #define VINV vsInv
 #define VTANH vsTanh
 #define VFMAXI vsFmaxI
 #define OMAT mkl_somatcopy
 #define IMAT mkl_simatcopy
-
+#define VCOPYSIGNI vsCopySignI
 #elif FIELD_T == FLT64
 #define DOT cblas_ddot
 #define GEMV cblas_dgemv
@@ -38,14 +40,17 @@
 #define ASUM cblas_dasum
 #define NRM2 cblas_dnrm2
 #define VMUL vdMul
+#define VMULI vdMulI
 #define VADD vdAdd
 #define VSUB vdSub
+#define VSUBI vdSubI
 #define VEXP vdExp
 #define VINV vdInv
 #define VTANH vdTanh
 #define VFMAXI vdFmaxI
 #define OMAT mkl_domatcopy
 #define IMAT mkl_dimatcopy
+#define VCOPYSIGNI vdCopySignI
 #endif /* FEILD_T */
 
 #endif /* BLASENG_MKL_H_INCLUDED */
