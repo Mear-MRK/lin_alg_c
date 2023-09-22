@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include <time.h>
 
+#include "blaseng.h"
+
 static FLT_TYP rnd(void)
 {
     return 2*rand()/(FLT_TYP)RAND_MAX - 1;

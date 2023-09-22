@@ -5,6 +5,8 @@
 #include <stdio.h>
 #include <assert.h>
 
+#include "blaseng.h"
+
 const vec_t vec_NULL = {.arr = NULL, .size = 0};
 
 bool vec_is_null(const vec_t *v)
@@ -33,7 +35,7 @@ void vec_destruct(vec_t *v)
     if (v && v->arr)
     {
         v->size = 0;
-        ALIGNED_FREE((void *)v->arr);
+        ALIGNED_FREE((uint8_t *)v->arr);
         v->arr = NULL;
     }
 }
@@ -63,7 +65,7 @@ void vec_del(vec_t *v)
     if (!v)
         return;
     vec_destruct(v);
-    free((void *)v);
+    free((uint8_t *)v);
 }
 
 vec_t *vec_copy_arr(vec_t *v, const FLT_TYP arr[])
@@ -88,7 +90,7 @@ vec_t *vec_assign(vec_t *dst, const vec_t *src)
 }
 
 vec_t *vec_fill_rnd(vec_t *v, FLT_TYP (*rnd)(void))
-{   
+{
     assert(v);
     assert(v->arr);
     for (IND_TYP i = 0; i < v->size; i++)
@@ -263,10 +265,19 @@ vec_t *vec_relu(vec_t *result, const vec_t *v)
     assert(result && v);
     assert(result->arr && v->arr);
     assert(result->size == v->size);
-    
+
     FLT_TYP zero = 0;
     VFMAXI(v->size, v->arr, 1, &zero, 0, result->arr, 1);
     return result;
+}
+
+FLT_TYP *vec_at(const vec_t *v, IND_TYP i)
+{
+    assert(v);
+    assert(v->arr);
+    // assert(i >= 0 && i < v->size);
+    i = ((i % v->size) + v->size) % v->size;
+    return v->arr + i;
 }
 
 vec_t *vec_addto(vec_t *v_dst, const vec_t *v_right)
@@ -373,4 +384,40 @@ vec_t *vec_apply(vec_t *v, FLT_TYP (*map)(FLT_TYP))
     for (IND_TYP i = 0; i < v->size; i++)
         v->arr[i] = map(v->arr[i]);
     return v;
+}
+
+size_t vec_serial_size(const vec_t *v)
+{
+    assert(v);
+    return sizeof(v->size) + v->size * sizeof(FLT_TYP);
+}
+
+uint8_t *vec_serialize(const vec_t *v, uint8_t *byte_arr)
+{
+    assert(v);
+    assert(byte_arr);
+    size_t sz = 0;
+    sz = sizeof(v->size);
+    memcpy(byte_arr, &v->size, sz);
+    byte_arr += sz;
+    sz = v->size * sizeof(FLT_TYP);
+    memcpy(byte_arr, v->arr, sz);
+    byte_arr += sz;
+    return byte_arr;
+}
+
+const uint8_t *vec_deserialize(vec_t *v, const uint8_t *byte_arr)
+{
+    assert(v);
+    assert(byte_arr);
+    IND_TYP size;
+    size_t sz = 0;
+    sz = sizeof(v->size);
+    memcpy(&size, byte_arr, sz);
+    byte_arr += sz;
+    vec_construct(v, size);
+    sz = v->size * sizeof(FLT_TYP);
+    memcpy(v->arr, byte_arr, sz);
+    byte_arr += sz;
+    return byte_arr;
 }

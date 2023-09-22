@@ -60,12 +60,22 @@ mat_t *mat_T(mat_t *m);
 FLT_TYP mat_norm_2(const mat_t *m);
 
 bool mat_is_close(const mat_t *m_1, const mat_t *m_2, FLT_TYP eps);
-mat_t *mat_fill(mat_t *m, FLT_TYP value);
+// mat_t *mat_fill(mat_t *m, FLT_TYP value);
 // mat_t *mat_diag_init(mat_t *m, const vec_t *v);
 
 char *mat_to_str(const mat_t *m, char *str_buff);
 // trg += alpha * m_right
 mat_t *mat_update(mat_t *trg, FLT_TYP alpha, const mat_t* m_right);
+
+// Gives pointer to m->arr[i][j]; i or j can be negative
+FLT_TYP *mat_at(const mat_t *m, IND_TYP i, IND_TYP j);
+
+size_t mat_serial_size(const mat_t *m);
+// Returns the pointer to the first byte just after the last written byte to byte_arr
+uint8_t *mat_serialize(const mat_t *m, uint8_t *byte_arr);
+// Returns the pointer to the first byte just after the last read byte from byte_arr
+const uint8_t *mat_deserialize(mat_t *m, const uint8_t *byte_arr);
+
 
 
 #ifdef __cplusplus

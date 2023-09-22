@@ -10,7 +10,7 @@ EXT_LIBPATH = /usr/lib/x86_64-linux-gnu
 
 DESTPATH = ${HOME}
 LIBINSTPATH = ${DESTPATH}/lib
-INCINSTPATH = ${DESTPATH}/include
+INCINSTPATH = ${DESTPATH}/include/${PRJNAME}
 
 RLS_FLT32_LIB = $(PRJNAME)_flt32
 RLS_FLT64_LIB = $(PRJNAME)_flt64
@@ -28,7 +28,7 @@ RLS_CFLAGS = -DNDEBUG $(COM_CFLAGS) $(OPT_CFLAGS)
 RLS_LDFLAGS = $(OPT_CFLAGS) -L$(LIBPATH) -L$(EXT_LIBPATH)
 DBG_CFLAGS = -DDEBUG -g $(COM_CFLAGS) 
 DBG_LDFLAGS = -L$(LIBPATH) -L$(EXT_LIBPATH) -g
-LD_LIBS = -lmkl_rt -lm # -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -lpthread -lm -ldl
+LD_LIBS = -Wl,--no-as-needed -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -liomp5 -lpthread -lm -ldl # -lmkl_rt -lm
 
 CFILES = $(wildcard $(SRCPATH)/*.c)
 HFILES = $(wildcard $(INCPATH)/*.h)

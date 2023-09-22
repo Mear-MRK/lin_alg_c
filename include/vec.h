@@ -156,6 +156,15 @@ IND_TYP vec_argmax(const vec_t* v);
 vec_t* vec_softargmax(vec_t* result, const vec_t* v);
 */
 
+// Gives pointer to v->arr[i]; i can be negative
+FLT_TYP *vec_at(const vec_t *v, IND_TYP i);
+
+size_t vec_serial_size(const vec_t* v);
+// Returns the pointer to the first byte just after the last written byte to byte_arr
+uint8_t *vec_serialize(const vec_t *v, uint8_t *byte_arr);
+// Returns the pointer to the first byte just after the last read byte from byte_arr
+const uint8_t *vec_deserialize(vec_t *v, const uint8_t *byte_arr);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

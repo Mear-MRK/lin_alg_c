@@ -27,7 +27,4 @@
 #define IND_TYP int64_t
 #endif /* INDEX_T */
 
-/* If using mkl */
-#include "blaseng_mkl.h"
-
 #endif /* LIN_ALG_CONFIG_H_INCLUDED */

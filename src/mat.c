@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include <assert.h>
 
+#include "blaseng.h"
+
 const mat_t mat_NULL = {.arr = NULL, .size = 0, .d1 = 0, .d2 = 0};
 
 bool mat_is_null(const mat_t *m)
@@ -49,7 +51,7 @@ mat_t *mat_init_prealloc(mat_t *m, FLT_TYP arr[], IND_TYP d1, IND_TYP d2)
 
     if (!m || d1 <= 0 || d2 <= 0)
         return m;
-    
+
     m->size = d1 * d2;
     m->d1 = d1;
     m->d2 = d2;
@@ -138,8 +140,59 @@ mat_t *mat_update(mat_t *m_trg, FLT_TYP alpha, const mat_t *m_right)
     assert(m_trg->d2 == m_right->d2);
 
     AXPY(m_trg->size, alpha, m_right->arr, 1, m_trg->arr, 1);
-    
+
     return m_trg;
+}
+
+FLT_TYP *mat_at(const mat_t *m, IND_TYP i, IND_TYP j)
+{
+    assert(m);
+    assert(m->arr);
+    i = ((i % m->d1) + m->d1) % m->d1;
+    j = ((j % m->d2) + m->d2) % m->d2;
+    return m->arr + (i * m->d2 + j);
+}
+
+size_t mat_serial_size(const mat_t *m)
+{
+    assert(m);
+    return sizeof(m->d1) + sizeof(m->d2) + m->size * sizeof(FLT_TYP);
+}
+
+uint8_t *mat_serialize(const mat_t *m, uint8_t *byte_arr)
+{
+    assert(m);
+    assert(byte_arr);
+    size_t sz = 0;
+    sz = sizeof(m->d1);
+    memcpy(byte_arr, &m->d1, sz);
+    byte_arr += sz;
+    sz = sizeof(m->d2);
+    memcpy(byte_arr, &m->d2, sz);
+    byte_arr += sz;
+    sz = m->size * sizeof(FLT_TYP);
+    memcpy(byte_arr, m->arr, sz);
+    byte_arr += sz;
+    return byte_arr;
+}
+
+const uint8_t *mat_deserialize(mat_t *m, const uint8_t *byte_arr)
+{
+    assert(m);
+    assert(byte_arr);
+    IND_TYP d1, d2;
+    size_t sz = 0;
+    sz = sizeof(m->d1);
+    memcpy(&d1, byte_arr, sz);
+    byte_arr += sz;
+    sz = sizeof(m->d2);
+    memcpy(&d2, byte_arr, sz);
+    byte_arr += sz;
+    mat_construct(m, d1, d2);
+    sz = m->size * sizeof(FLT_TYP);
+    memcpy(m->arr, byte_arr, sz);
+    byte_arr += sz;
+    return byte_arr;
 }
 
 mat_t *mat_mul(mat_t *result, const mat_t *m_left, const mat_t *m_right)

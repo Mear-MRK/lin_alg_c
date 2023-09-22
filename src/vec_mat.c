@@ -2,10 +2,14 @@
 
 #include <assert.h>
 
+#include "blaseng.h"
+
 vec_t *mat_dot_vec(vec_t *target, const mat_t *ml, const vec_t *vr)
 {
     assert(target && ml && vr);
-    assert(ml->arr && target->arr && vr->arr);
+    assert(ml->arr);
+    assert(target->arr);
+    assert(vr->arr);
     assert(ml->d2 == vr->size);
     assert(target->arr != vr->arr);
     
@@ -18,7 +22,9 @@ vec_t *mat_dot_vec(vec_t *target, const mat_t *ml, const vec_t *vr)
 vec_t *vec_dot_mat(vec_t *target, const vec_t *vl, const mat_t *mr)
 {
     assert(target && vl && mr);
-    assert(vl->arr && mr->arr && target->arr);
+    assert(vl->arr);
+    assert(mr->arr);
+    assert(target->arr);
     assert(vl->size == mr->d1);
     assert(target->arr != vl->arr);
     
