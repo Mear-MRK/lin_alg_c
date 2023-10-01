@@ -176,6 +176,15 @@ vec_t *vec_mul(vec_t *result, const vec_t *v_left, const vec_t *v_right)
     return result;
 }
 
+vec_t *vec_div(vec_t *result, const vec_t *v_left, const vec_t *v_right)
+{
+    assert(result && v_left && v_right);
+    assert(result->arr && v_left->arr && v_right->arr);
+    assert(v_left->size == v_right->size && v_left->size == result->size);
+    VDIV(v_left->size, v_left->arr, v_right->arr, result->arr);
+    return result;
+}
+
 vec_t *vec_sclmul(vec_t *result, const vec_t *v, FLT_TYP alpha)
 {
     assert(result && v);
@@ -238,6 +247,24 @@ vec_t *vec_inv(vec_t *result, const vec_t *v)
     assert(result->arr && v->arr);
     assert(result->size == v->size);
     VINV(v->size, v->arr, result->arr);
+    return result;
+}
+
+vec_t *vec_sqrt(vec_t *result, const vec_t *v)
+{
+    assert(v && result);
+    assert(result->arr && v->arr);
+    assert(result->size == v->size);
+    VSQRT(v->size, v->arr, result->arr);
+    return result;
+}
+
+vec_t *vec_square(vec_t *result, const vec_t *v)
+{
+    assert(v && result);
+    assert(result->arr && v->arr);
+    assert(result->size == v->size);
+    VSQR(v->size, v->arr, result->arr);
     return result;
 }
 

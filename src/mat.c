@@ -207,6 +207,18 @@ mat_t *mat_mul(mat_t *result, const mat_t *m_left, const mat_t *m_right)
     return result;
 }
 
+mat_t *mat_div(mat_t *result, const mat_t *m_left, const mat_t *m_right)
+{
+    assert(result && m_left && m_right);
+    assert(result->arr && m_left->arr && m_right->arr);
+    assert(result->d1 == m_left->d1 && result->d1 == m_right->d1);
+    assert(result->d2 == m_left->d2 && result->d2 == m_right->d2);
+
+    VDIV(m_left->size, m_left->arr, m_right->arr, result->arr);
+
+    return result;
+}
+
 mat_t *mat_mulby(mat_t *m_target, const mat_t *m_right)
 {
     assert(m_target && m_right);
@@ -273,6 +285,14 @@ mat_t *mat_addto(mat_t *m_target, const mat_t *m_right)
     return mat_add(m_target, m_target, m_right);
 }
 
+mat_t *mat_f_addto(mat_t *m, FLT_TYP f)
+{
+    assert(m);
+    assert(m->arr);
+    AXPY(m->size, 1, &f, 0, m->arr, 1);
+    return m;
+}
+
 mat_t *mat_subfrom(mat_t *m_target, const mat_t *m_right)
 {
     assert(m_target && m_right);
@@ -291,6 +311,34 @@ mat_t *mat_scale(mat_t *m, FLT_TYP scale)
     SCAL(m->size, scale, m->arr, 1);
 
     return m;
+}
+
+mat_t *mat_square(mat_t *result, const mat_t *m)
+{
+    assert(result);
+    assert(m);
+    assert(result->arr);
+    assert(m->arr);
+    assert(result->d1 == m->d1);
+    assert(result->d2 == m->d2);
+
+    VSQR(m->size, m->arr, result->arr);
+
+    return result;
+}
+
+mat_t *mat_sqrt(mat_t *result, const mat_t *m)
+{
+    assert(result);
+    assert(m);
+    assert(result->arr);
+    assert(m->arr);
+    assert(result->d1 == m->d1);
+    assert(result->d2 == m->d2);
+
+    VSQRT(m->size, m->arr, result->arr);
+
+    return result;
 }
 
 mat_t *mat_transpose(mat_t *result, const mat_t *target)

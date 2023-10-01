@@ -19,10 +19,13 @@
 #define ASUM cblas_sasum
 #define NRM2 cblas_snrm2
 #define VMUL vsMul
+#define VDIV vsDiv
 #define VMULI vsMulI
 #define VADD vsAdd
 #define VSUB vsSub
 #define VSUBI vsSubI
+#define VSQR vsSqr
+#define VSQRT vsSqrt
 #define VEXP vsExp
 #define VINV vsInv
 #define VTANH vsTanh
@@ -40,10 +43,13 @@
 #define ASUM cblas_dasum
 #define NRM2 cblas_dnrm2
 #define VMUL vdMul
+#define VDIV vdDiv
 #define VMULI vdMulI
 #define VADD vdAdd
 #define VSUB vdSub
 #define VSUBI vdSubI
+#define VSQR vdSqr
+#define VSQRT vdSqrt
 #define VEXP vdExp
 #define VINV vdInv
 #define VTANH vdTanh

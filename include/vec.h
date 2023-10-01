@@ -99,6 +99,8 @@ vec_t* vec_add(vec_t* result, const vec_t* v_left, const vec_t* v_right);
 vec_t* vec_sub(vec_t* result, const vec_t* v_left, const vec_t* v_right);
 // result = v_left * v_right (element-wise *)
 vec_t* vec_mul(vec_t* result, const vec_t* v_left, const vec_t* v_right);
+// result = v_left / v_right (element-wise /)
+vec_t* vec_div(vec_t* result, const vec_t* v_left, const vec_t* v_right);
 // result = alpha * v
 vec_t* vec_sclmul(vec_t* result, const vec_t* v, FLT_TYP alpha);
 // v_dst += v_right
@@ -143,6 +145,10 @@ vec_t* vec_apply(vec_t* v, FLT_TYP (*map)(FLT_TYP));
 vec_t* vec_exp(vec_t* result, const vec_t* v);
 // result = 1 / v (element-wise inversion)
 vec_t* vec_inv(vec_t* result, const vec_t* v);
+// result = sqrt(v)
+vec_t* vec_sqrt(vec_t* result, const vec_t* v);
+// result = v^2
+vec_t* vec_square(vec_t* result, const vec_t* v);
 // result = tanh(v)
 vec_t* vec_tanh(vec_t* result, const vec_t* v);
 // result = sigmoid(v) 
@@ -150,7 +156,6 @@ vec_t* vec_sigmoid(vec_t* result, const vec_t* v);
 // result = ReLu(v)
 vec_t *vec_relu(vec_t *result, const vec_t *v);
 /* NOT implemented yet.
-vec_t* vec_square(vec_t* result, const vec_t* v);
 FLT_TYP vec_max(const vec_t* v);
 IND_TYP vec_argmax(const vec_t* v);
 vec_t* vec_softargmax(vec_t* result, const vec_t* v);
