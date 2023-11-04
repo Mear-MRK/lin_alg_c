@@ -25,7 +25,7 @@ void vec_mat_test(void)
     vec_init_prealloc(&res_3, res_3_arr, 3);
 
     for(int i = 0; i < 6; i++)
-        m.arr[i] = i + 1;
+        m.ply[i] = i + 1;
 
     mat_dot_vec(&res_2, &m, &vr);
     vec_dot_mat(&res_3, &vl, &m);

@@ -21,14 +21,15 @@ CC = gcc
 LD = gcc
 AR = ar
 
-COM_CFLAGS = -std=c11 -Wall -Wextra -I$(INCPATH) -I$(EXT_INCPATH) -DINDEX_T=INT32
+COM_CFLAGS = -m64 -std=c11 -Wall -Wextra -I$(INCPATH) -I$(EXT_INCPATH)
 OPT_CFLAGS = -flto -O3
 
 RLS_CFLAGS = -DNDEBUG $(COM_CFLAGS) $(OPT_CFLAGS)
 RLS_LDFLAGS = $(OPT_CFLAGS) -L$(LIBPATH) -L$(EXT_LIBPATH)
 DBG_CFLAGS = -DDEBUG -g $(COM_CFLAGS) 
 DBG_LDFLAGS = -L$(LIBPATH) -L$(EXT_LIBPATH) -g
-LD_LIBS = -Wl,--no-as-needed -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -liomp5 -lpthread -lm -ldl # -lmkl_rt -lm
+LD_LIBS = -lmkl_rt -lm
+# -Wl,--no-as-needed -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -liomp5 -lpthread -lm -ldl
 
 CFILES = $(wildcard $(SRCPATH)/*.c)
 HFILES = $(wildcard $(INCPATH)/*.h)
@@ -44,19 +45,19 @@ all: debug release test
 
 $(OBJPATH)/%_flt32.o: $(SRCPATH)/%.c $(HFILES)
 	@mkdir -p $(OBJPATH)
-	$(CC) $(RLS_CFLAGS) -DFEILD_T=FLT32 -o $@ -c $<
+	$(CC) $(RLS_CFLAGS) -DFLT32=32 -o $@ -c $<
 
 $(OBJPATH)/%_flt64.o: $(SRCPATH)/%.c $(HFILES)
 	@mkdir -p $(OBJPATH)
-	$(CC) $(RLS_CFLAGS) -DFEILD_T=FLT64 -o $@ -c $<
+	$(CC) $(RLS_CFLAGS) -DFLT64=64 -o $@ -c $<
 
 $(OBJPATH)/%_flt32_dbg.o: $(SRCPATH)/%.c $(HFILES)
 	@mkdir -p $(OBJPATH)
-	$(CC) $(DBG_CFLAGS) -DFEILD_T=FLT32 -o $@ -c $<
+	$(CC) $(DBG_CFLAGS) -DFLT32=32 -o $@ -c $<
 
 $(OBJPATH)/%_flt64_dbg.o: $(SRCPATH)/%.c $(HFILES)
 	@mkdir -p $(OBJPATH)
-	$(CC) $(DBG_CFLAGS) -DFEILD_T=FLT64 -o $@ -c $<
+	$(CC) $(DBG_CFLAGS) -DFLT64=64 -o $@ -c $<
 
 $(LIBPATH)/lib$(RLS_FLT32_LIB).a: $(RLS_FLT32_OBJS)
 	@mkdir -p $(LIBPATH)

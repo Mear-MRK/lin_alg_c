@@ -11,20 +11,20 @@ static FLT_TYP rnd(void)
     return 2*rand()/(FLT_TYP)RAND_MAX - 1;
 }
 
-static inline FLT_TYP* arr_lin_fill(FLT_TYP* arr, FLT_TYP start, FLT_TYP end, IND_TYP sz)
+static inline FLT_TYP* arr_lin_fill(FLT_TYP* ply, FLT_TYP start, FLT_TYP end, IND_TYP sz)
 {
-    if (!arr || sz == 0)
-        return arr;
+    if (!ply || sz == 0)
+        return ply;
 
     if (sz == 1)
     {
-        arr[0] = start;
-        return arr;
+        ply[0] = start;
+        return ply;
     }
     FLT_TYP dlt = (end - start) / (sz-1);
     for(IND_TYP i = 0; i < sz; i++)
-        arr[i] = start + i * dlt;
-    return arr;
+        ply[i] = start + i * dlt;
+    return ply;
 }
 
 static vec_t *vec_sigmoid_alt(vec_t *result, const vec_t *v)
@@ -87,7 +87,7 @@ void relu_test(void)
     vec_t* v = vec_new(sz);
     vec_t* r = vec_new(sz);
     
-    arr_lin_fill(v->arr, -3, 3, 7);
+    arr_lin_fill(v->ply->arr, -3, 3, 7);
     
     char str_bf[1024] = {0};
     
@@ -110,12 +110,12 @@ void fill_vec_test(void)
     vec_construct(&v2, sz);
     
     clock_t start = clock();
-    for(float f = 0; f < 1000000; f+=1.0001)
+    for(FLT_TYP f = 0; f < 1000000; f+=1.0001)
         vec_fill(&v1, f);
     clock_t end = clock();
     printf("    fill: %g\n", (end-start)/(double)CLOCKS_PER_SEC);
     start = clock();
-    for(float f = 0; f < 1000000; f+=1.0001)
+    for(FLT_TYP f = 0; f < 1000000; f+=1.0001)
         vec_fill_altimp(&v2, f);
     end = clock();
     printf("rec_fill: %g\n", (end-start)/(double)CLOCKS_PER_SEC);
@@ -135,8 +135,8 @@ void vec_test(void)
     puts("+++ vec_test +++");
     char str_buff[4096] = {0};
 
-    float a_arr[3] = {1., 2., 3.};
-    float b_arr[3] = {-1, 1, 2};
+    FLT_TYP a_arr[3] = {1., 2., 3.};
+    FLT_TYP b_arr[3] = {-1, 1, 2};
 
     vec_t va = vec_NULL;
     vec_t vb = vec_NULL;

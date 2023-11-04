@@ -1,15 +1,16 @@
 #ifndef BLASENG_MKL_H_INCLUDED
 #define BLASENG_MKL_H_INCLUDED 1
 
-#if INDEX_T == INT64
+#ifdef INT64
 #define MKL_ILP64 1
 #endif
 #include "mkl.h"
-#define ALIGNED_MALLOC(sz) mkl_malloc(sz, 64)
-#define ALIGNED_CALLOC(nbr, sz) mkl_calloc(nbr, sz, 64)
-#define ALIGNED_FREE(ptr) mkl_free(ptr)
+// #define ALIGNED_MALLOC(sz) mkl_malloc(sz, 64)
+// #define ALIGNED_CALLOC(nbr, sz) mkl_calloc(nbr, sz, 64)
+// #define ALIGNED_FREE(ptr) mkl_free(ptr)
 
-#if FIELD_T == FLT32
+#ifdef FLT32
+#define COPY cblas_scopy
 #define DOT cblas_sdot
 #define GEMV cblas_sgemv
 #define GEMM cblas_sgemm
@@ -19,21 +20,27 @@
 #define ASUM cblas_sasum
 #define NRM2 cblas_snrm2
 #define VMUL vsMul
-#define VDIV vsDiv
 #define VMULI vsMulI
+#define VDIV vsDiv
+#define VDIVI vsDivI
 #define VADD vsAdd
+#define VADDI vsAddI
 #define VSUB vsSub
 #define VSUBI vsSubI
-#define VSQR vsSqr
-#define VSQRT vsSqrt
+#define VSQRI vsSqrI
+#define VSQRTI vsSqrtI
 #define VEXP vsExp
-#define VINV vsInv
-#define VTANH vsTanh
+#define VEXPI vsExpI
+#define VLNI vsLnI
+#define VLOG2I vsLog2I
+#define VINVI vsInvI
+#define VTANHI vsTanhI
 #define VFMAXI vsFmaxI
 #define OMAT mkl_somatcopy
 #define IMAT mkl_simatcopy
 #define VCOPYSIGNI vsCopySignI
-#elif FIELD_T == FLT64
+#elif defined(FLT64)
+#define COPY cblas_dcopy
 #define DOT cblas_ddot
 #define GEMV cblas_dgemv
 #define GEMM cblas_dgemm
@@ -43,20 +50,25 @@
 #define ASUM cblas_dasum
 #define NRM2 cblas_dnrm2
 #define VMUL vdMul
-#define VDIV vdDiv
 #define VMULI vdMulI
+#define VDIV vdDiv
+#define VDIVI vdDivI
 #define VADD vdAdd
+#define VADDI vdAddI
 #define VSUB vdSub
 #define VSUBI vdSubI
-#define VSQR vdSqr
-#define VSQRT vdSqrt
+#define VSQRI vdSqrI
+#define VSQRTI vdSqrtI
 #define VEXP vdExp
-#define VINV vdInv
-#define VTANH vdTanh
+#define VEXPI vdExpI
+#define VLNI vdLnI
+#define VLOG2I vdLog2I
+#define VINVI vdInvI
+#define VTANHI vdTanhI
 #define VFMAXI vdFmaxI
 #define OMAT mkl_domatcopy
 #define IMAT mkl_dimatcopy
 #define VCOPYSIGNI vdCopySignI
-#endif /* FEILD_T */
+#endif 
 
 #endif /* BLASENG_MKL_H_INCLUDED */
