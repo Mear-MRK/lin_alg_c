@@ -11,20 +11,20 @@ static FLT_TYP rnd(void)
     return 2*rand()/(FLT_TYP)RAND_MAX - 1;
 }
 
-static inline FLT_TYP* arr_lin_fill(FLT_TYP* ply, FLT_TYP start, FLT_TYP end, IND_TYP sz)
+static inline FLT_TYP* arr_lin_fill(FLT_TYP* arr, FLT_TYP start, FLT_TYP end, IND_TYP sz)
 {
-    if (!ply || sz == 0)
-        return ply;
+    if (!arr || sz == 0)
+        return arr;
 
     if (sz == 1)
     {
-        ply[0] = start;
-        return ply;
+        arr[0] = start;
+        return arr;
     }
     FLT_TYP dlt = (end - start) / (sz-1);
     for(IND_TYP i = 0; i < sz; i++)
-        ply[i] = start + i * dlt;
-    return ply;
+        arr[i] = start + i * dlt;
+    return arr;
 }
 
 static vec_t *vec_sigmoid_alt(vec_t *result, const vec_t *v)
@@ -87,7 +87,7 @@ void relu_test(void)
     vec_t* v = vec_new(sz);
     vec_t* r = vec_new(sz);
     
-    arr_lin_fill(v->ply->arr, -3, 3, 7);
+    arr_lin_fill(v->pyl->arr, -3, 3, 7);
     
     char str_bf[1024] = {0};
     
@@ -114,16 +114,16 @@ void fill_vec_test(void)
         vec_fill(&v1, f);
     clock_t end = clock();
     printf("    fill: %g\n", (end-start)/(double)CLOCKS_PER_SEC);
-    start = clock();
-    for(FLT_TYP f = 0; f < 1000000; f+=1.0001)
-        vec_fill_altimp(&v2, f);
-    end = clock();
-    printf("rec_fill: %g\n", (end-start)/(double)CLOCKS_PER_SEC);
+    // start = clock();
+    // // for(FLT_TYP f = 0; f < 1000000; f+=1.0001)
+    // //     vec_fill_altimp(&v2, f);
+    // end = clock();
+    // printf("rec_fill: %g\n", (end-start)/(double)CLOCKS_PER_SEC);
 
-    if (! vec_is_close(&v1, &v2, 1E-7)){
-        char bf[4096];
-        printf("v1 != v2\n %s\n", vec_to_str(&v2, bf));
-    }
+    // if (! vec_is_close(&v1, &v2, 1E-7)){
+    //     char bf[4096];
+    //     printf("v1 != v2\n %s\n", vec_to_str(&v2, bf));
+    // }
 
     vec_destruct(&v1);
     vec_destruct(&v2);
@@ -135,7 +135,7 @@ void vec_test(void)
     puts("+++ vec_test +++");
     char str_buff[4096] = {0};
 
-    FLT_TYP a_arr[3] = {1., 2., 3.};
+    FLT_TYP a_arr[3] = {1, 2, 3};
     FLT_TYP b_arr[3] = {-1, 1, 2};
 
     vec_t va = vec_NULL;
@@ -143,8 +143,10 @@ void vec_test(void)
     vec_t* vr = vec_new(3);
 
 
-    vec_init_prealloc(&va, a_arr, 3);
-    vec_init_prealloc(&vb, b_arr, 3);
+    vec_construct(&va, 3);
+    vec_copy_arr(&va, a_arr);
+    vec_construct(&vb, 3);
+    vec_copy_arr(&vb, b_arr);
 
     printf("va: %s, norm2: %g, norm1: %g, sum: %g\n", vec_to_str(&va, str_buff)
         , vec_norm_2(&va), vec_norm_1(&va), vec_sum(&va));
@@ -171,6 +173,8 @@ void vec_test(void)
     printf("va=vb*3.14: %s\n", vec_to_str(&va, str_buff));
 
     vec_del(vr);
+    vec_destruct(&va);
+    vec_destruct(&vb);
 
     // fill_vec_test();
     

@@ -12,25 +12,28 @@ typedef struct mat_struct
     IND_TYP size;
     IND_TYP d1;
     IND_TYP d2;
-    IND_TYP start_1;
-    IND_TYP start_2;
-    IND_TYP step_1;
-    IND_TYP step_2;
+    IND_TYP offset;
 } mat_t;
 
-#define mat_NULL ((const mat_t){.pyl = &payload_NULL, .size = 0, .d1 = 0, .d2 = 0, .start_1 = 0, .start_2 = 0, .step_1 = 0, .step_2 = 0})
+#define mat_NULL ((const mat_t){.pyl = NULL, .size = 0, .d1 = 0, .d2 = 0, .offset = 0})
 
 bool mat_is_null(const mat_t *m);
 
+bool mat_is_valid(const mat_t *m);
+
 mat_t *mat_construct(mat_t *m, IND_TYP d1, IND_TYP d2);
+
+mat_t *mat_construct_prealloc(mat_t *m, payload_t *pyl, IND_TYP d1, IND_TYP d2, IND_TYP offset);
+
+mat_t *mat_view(mat_t *m, const mat_t *src, IND_TYP offset, IND_TYP d1, IND_TYP d2);
+
+mat_t *mat_view_new(const mat_t *src, IND_TYP offset, IND_TYP d1, IND_TYP d2);
 
 void mat_destruct(mat_t *m);
 
 mat_t *mat_new(IND_TYP d1, IND_TYP d2);
 
 void mat_del(mat_t *m);
-
-mat_t *mat_init_prealloc(mat_t *m, FLT_TYP src_arr[], IND_TYP d1, IND_TYP d2);
 
 mat_t *mat_assign(mat_t *m_dst, const mat_t *m_src);
 

@@ -12,7 +12,7 @@ typedef struct vec_struct
 {
     payload_t *pyl;
     IND_TYP d;
-    IND_TYP start;
+    IND_TYP offset;
     IND_TYP step;
 } vec_t;
 
@@ -21,7 +21,7 @@ typedef struct vec_struct
  * It's a good practice to initialize any
  * declared vec_t with this value.
  */
-#define vec_NULL ((const vec_t){.pyl = &payload_NULL, .start = 0, .step = 0})
+#define vec_NULL ((const vec_t){.pyl = NULL, .offset = 0, .step = 0})
 
 /*
  * Checks to find if vec_t v is vec_NULL
@@ -39,6 +39,8 @@ bool vec_is_valid(const vec_t *v);
  * Content of v->pyl->arr is garbage.
  */
 vec_t *vec_construct(vec_t *v, IND_TYP d);
+
+vec_t *vec_construct_prealloc(vec_t *v, payload_t *pyl, IND_TYP start, IND_TYP stop, IND_TYP step);
 
 /*
  * Frees v->pyl->arr and sets *v = vec_NULL.

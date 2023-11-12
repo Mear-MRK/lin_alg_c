@@ -18,10 +18,15 @@ bool vec_is_null(const vec_t *v)
 
 bool vec_is_valid(const vec_t *v)
 {
+    IND_TYP end = v->offset + (v->d - 1) * v->step;
     return v &&
            !vec_is_null(v) &&
            v->d > 0 &&
-           payload_is_valid(v->pyl);
+           payload_is_valid(v->pyl) &&
+           v->offset >= 0 &&
+           end >= 0 &&
+           v->pyl->size > v->offset &&
+           v->pyl->size > end;
 }
 
 vec_t *vec_construct(vec_t *v, IND_TYP d)
@@ -38,11 +43,39 @@ vec_t *vec_construct(vec_t *v, IND_TYP d)
     }
 
     v->d = d;
-    v->start = 0;
+    v->offset = 0;
     v->step = 1;
-    payload_construct(v->pyl, d);
+    v->pyl = payload_new(d);
     if (!payload_is_valid(v->pyl))
         *v = vec_NULL;
+
+    return v;
+}
+
+vec_t *vec_construct_prealloc(vec_t *v, payload_t *pyl, IND_TYP start, IND_TYP stop, IND_TYP step)
+{
+    assert(v);
+    assert(payload_is_valid(pyl));
+
+    if (stop < 0)
+        stop += pyl->size;
+    if (start < 0)
+        start += pyl->size;
+
+    if (start < 0 ||
+        stop > pyl->size ||
+        step == 0 ||
+        stop == start ||
+        stop > start && step < 0 ||
+        stop < start && step > 0)
+    {
+        *v = vec_NULL;
+        return v;
+    }
+    v->offset = start;
+    v->step = step;
+    v->d = (stop - start) / step + (IND_TYP)(0 != ((stop - start) % step));
+    v->pyl = payload_share(pyl);
 
     return v;
 }
@@ -77,7 +110,7 @@ vec_t *vec_view(vec_t *view, const vec_t *src, IND_TYP start, IND_TYP stop, IND_
         return view;
     }
 
-    view->start = start * src->step + src->start;
+    view->offset = start * src->step + src->offset;
     // view->stop = stop * src->step + src->start;
     view->step = step * src->step;
     view->d = (stop - start) / step + (IND_TYP)(0 != ((stop - start) % step));
@@ -101,9 +134,10 @@ vec_t *vec_new(IND_TYP d)
     assert(d > 0);
 
     if (d <= 0)
-        return &vec_NULL;
-    vec_t *new_v = (vec_t *)calloc(1, sizeof(vec_t));
+        return NULL;
+    vec_t *new_v = (vec_t *)malloc(sizeof(vec_t));
     assert(new_v);
+    *new_v = vec_NULL;
     return vec_construct(new_v, d);
 }
 
@@ -120,9 +154,11 @@ vec_t *vec_new_view(const vec_t *src, IND_TYP start, IND_TYP stop, IND_TYP step)
 void vec_del(vec_t *v)
 {
     assert(vec_is_valid(v));
-    vec_destruct(v);
     if (v)
+    {
+        vec_destruct(v);
         free((void *)v);
+    }
 }
 
 vec_t *vec_copy_arr(vec_t *v, const FLT_TYP arr[])
@@ -130,7 +166,7 @@ vec_t *vec_copy_arr(vec_t *v, const FLT_TYP arr[])
     assert(vec_is_valid(v));
     assert(arr);
 
-    COPY(v->d, arr, 1, v->pyl->arr + v->start, v->step);
+    COPY(v->d, arr, 1, v->pyl->arr + v->offset, v->step);
 
     return v;
 }
@@ -142,8 +178,8 @@ vec_t *vec_assign(vec_t *dst, const vec_t *src)
     assert(dst->d == src->d);
 
     COPY(dst->d,
-         src->pyl->arr + src->start, src->step,
-         dst->pyl->arr + dst->start, dst->step);
+         src->pyl->arr + src->offset, src->step,
+         dst->pyl->arr + dst->offset, dst->step);
 
     return dst;
 }
@@ -154,7 +190,7 @@ vec_t *vec_fill_rnd(vec_t *v, FLT_TYP (*rnd)(void))
 
     for (IND_TYP j = 0; j < v->d; j++)
     {
-        IND_TYP i = v->start + j * v->step;
+        IND_TYP i = v->offset + j * v->step;
         v->pyl->arr[i] = rnd();
     }
     return v;
@@ -185,7 +221,7 @@ vec_t *vec_fill(vec_t *v, FLT_TYP value)
 {
     assert(vec_is_valid(v));
 
-    COPY(v->d, &value, 0, v->pyl->arr + v->start, v->step);
+    COPY(v->d, &value, 0, v->pyl->arr + v->offset, v->step);
 
     return v;
 }
@@ -195,7 +231,7 @@ vec_t *vec_fill_zero(vec_t *v)
     assert(vec_is_valid(v));
 
     if (v->step == 1)
-        memset(v->pyl->arr + v->start, 0, v->d * sizeof(FLT_TYP));
+        memset(v->pyl->arr + v->offset, 0, v->d * sizeof(FLT_TYP));
     else
         vec_fill(v, 0);
 
@@ -210,7 +246,7 @@ char *vec_to_str(const vec_t *v, char *v_str)
     strcpy(v_str, "[");
     for (IND_TYP j = 0; j < v->d; j++)
     {
-        IND_TYP i = v->start + j * v->step;
+        IND_TYP i = v->offset + j * v->step;
         sprintf(buff, (j + 1 != v->d) ? "%g," : "%g", v->pyl->arr[i]);
         strcat(v_str, buff);
     }
@@ -226,9 +262,9 @@ vec_t *vec_add(vec_t *result, const vec_t *v_left, const vec_t *v_right)
     assert(v_left->d == v_right->d && v_left->d == result->d);
 
     VADDI(result->d,
-          v_left->pyl->arr + v_left->start, v_left->step,
-          v_right->pyl->arr + v_right->start, v_right->step,
-          result->pyl->arr + result->start, result->step);
+          v_left->pyl->arr + v_left->offset, v_left->step,
+          v_right->pyl->arr + v_right->offset, v_right->step,
+          result->pyl->arr + result->offset, result->step);
 
     return result;
 }
@@ -241,9 +277,9 @@ vec_t *vec_sub(vec_t *result, const vec_t *v_left, const vec_t *v_right)
     assert(v_left->d == v_right->d && v_left->d == result->d);
 
     VSUBI(result->d,
-          v_left->pyl->arr + v_left->start, v_left->step,
-          v_right->pyl->arr + v_right->start, v_right->step,
-          result->pyl->arr + result->start, result->step);
+          v_left->pyl->arr + v_left->offset, v_left->step,
+          v_right->pyl->arr + v_right->offset, v_right->step,
+          result->pyl->arr + result->offset, result->step);
 
     return result;
 }
@@ -256,9 +292,9 @@ vec_t *vec_mul(vec_t *result, const vec_t *v_left, const vec_t *v_right)
     assert(v_left->d == v_right->d && v_left->d == result->d);
 
     VMULI(result->d,
-          v_left->pyl->arr + v_left->start, v_left->step,
-          v_right->pyl->arr + v_right->start, v_right->step,
-          result->pyl->arr + result->start, result->step);
+          v_left->pyl->arr + v_left->offset, v_left->step,
+          v_right->pyl->arr + v_right->offset, v_right->step,
+          result->pyl->arr + result->offset, result->step);
 
     return result;
 }
@@ -271,9 +307,9 @@ vec_t *vec_div(vec_t *result, const vec_t *v_left, const vec_t *v_right)
     assert(v_left->d == v_right->d && v_left->d == result->d);
 
     VDIVI(result->d,
-          v_left->pyl->arr + v_left->start, v_left->step,
-          v_right->pyl->arr + v_right->start, v_right->step,
-          result->pyl->arr + result->start, result->step);
+          v_left->pyl->arr + v_left->offset, v_left->step,
+          v_right->pyl->arr + v_right->offset, v_right->step,
+          result->pyl->arr + result->offset, result->step);
 
     return result;
 }
@@ -285,9 +321,9 @@ vec_t *vec_sclmul(vec_t *result, const vec_t *v, FLT_TYP alpha)
     assert(v->d == result->d);
 
     VMULI(v->d,
-          v->pyl->arr + v->start, v->step,
+          v->pyl->arr + v->offset, v->step,
           &alpha, 0,
-          result->pyl->arr + result->start, result->step);
+          result->pyl->arr + result->offset, result->step);
 
     return result;
 }
@@ -298,7 +334,7 @@ vec_t *vec_f_addto(vec_t *v, FLT_TYP f)
 
     AXPY(v->d, 1,
          &f, 0,
-         v->pyl->arr + v->start, v->step);
+         v->pyl->arr + v->offset, v->step);
 
     return v;
 }
@@ -311,8 +347,8 @@ vec_t *vec_f_sub(vec_t *result, FLT_TYP f, const vec_t *v_right)
 
     VSUBI(result->d,
           &f, 0,
-          v_right->pyl->arr + v_right->start, v_right->step,
-          result->pyl->arr + result->start, result->step);
+          v_right->pyl->arr + v_right->offset, v_right->step,
+          result->pyl->arr + result->offset, result->step);
 
     return result;
 }
@@ -322,7 +358,7 @@ vec_t *vec_scale(vec_t *v, FLT_TYP scale)
     assert(vec_is_valid(v));
 
     SCAL(v->d, scale,
-         v->pyl->arr + v->start, v->step);
+         v->pyl->arr + v->offset, v->step);
 
     return v;
 }
@@ -334,8 +370,8 @@ vec_t *vec_update(vec_t *v_dst, FLT_TYP alpha, const vec_t *v_right)
     assert(v_dst->d == v_right->d);
 
     AXPY(v_dst->d, alpha,
-         v_right->pyl->arr + v_right->start, v_right->step,
-         v_dst->pyl->arr + v_dst->start, v_dst->step);
+         v_right->pyl->arr + v_right->offset, v_right->step,
+         v_dst->pyl->arr + v_dst->offset, v_dst->step);
 
     return v_dst;
 }
@@ -347,8 +383,8 @@ vec_t *vec_exp(vec_t *result, const vec_t *v)
     assert(v->d == result->d);
 
     VEXPI(result->d,
-          v->pyl->arr + v->start, v->step,
-          result->pyl->arr + result->start, result->step);
+          v->pyl->arr + v->offset, v->step,
+          result->pyl->arr + result->offset, result->step);
 
     return result;
 }
@@ -360,8 +396,8 @@ vec_t *vec_log2(vec_t *result, const vec_t *v)
     assert(v->d == result->d);
 
     VLOG2I(result->d,
-           v->pyl->arr + v->start, v->step,
-           result->pyl->arr + result->start, result->step);
+           v->pyl->arr + v->offset, v->step,
+           result->pyl->arr + result->offset, result->step);
 
     return result;
 }
@@ -373,8 +409,8 @@ vec_t *vec_inv(vec_t *result, const vec_t *v)
     assert(v->d == result->d);
 
     VINVI(result->d,
-          v->pyl->arr + v->start, v->step,
-          result->pyl->arr + result->start, result->step);
+          v->pyl->arr + v->offset, v->step,
+          result->pyl->arr + result->offset, result->step);
 
     return result;
 }
@@ -386,8 +422,8 @@ vec_t *vec_sqrt(vec_t *result, const vec_t *v)
     assert(v->d == result->d);
 
     VSQRTI(result->d,
-           v->pyl->arr + v->start, v->step,
-           result->pyl->arr + result->start, result->step);
+           v->pyl->arr + v->offset, v->step,
+           result->pyl->arr + result->offset, result->step);
 
     return result;
 }
@@ -399,8 +435,8 @@ vec_t *vec_square(vec_t *result, const vec_t *v)
     assert(v->d == result->d);
 
     VSQRI(result->d,
-          v->pyl->arr + v->start, v->step,
-          result->pyl->arr + result->start, result->step);
+          v->pyl->arr + v->offset, v->step,
+          result->pyl->arr + result->offset, result->step);
 
     return result;
 }
@@ -412,8 +448,8 @@ vec_t *vec_tanh(vec_t *result, const vec_t *v)
     assert(v->d == result->d);
 
     VTANHI(result->d,
-           v->pyl->arr + v->start, v->step,
-           result->pyl->arr + result->start, result->step);
+           v->pyl->arr + v->offset, v->step,
+           result->pyl->arr + result->offset, result->step);
 
     return result;
 }
@@ -438,9 +474,9 @@ vec_t *vec_relu(vec_t *result, const vec_t *v)
 
     FLT_TYP zero = 0;
     VFMAXI(v->d,
-           v->pyl->arr + v->start, v->step,
+           v->pyl->arr + v->offset, v->step,
            &zero, 0,
-           result->pyl->arr + result->start, result->step);
+           result->pyl->arr + result->offset, result->step);
 
     return result;
 }
@@ -459,10 +495,10 @@ FLT_TYP vec_max(const vec_t *v)
 {
     assert(vec_is_valid(v));
 
-    FLT_TYP max = v->pyl->arr[v->start];
+    FLT_TYP max = v->pyl->arr[v->offset];
     for (IND_TYP j = 1; j < v->d; j++)
     {
-        IND_TYP i = v->start + j * v->step;
+        IND_TYP i = v->offset + j * v->step;
         if (v->pyl->arr[i] > max)
         {
             max = v->pyl->arr[i];
@@ -475,11 +511,11 @@ IND_TYP vec_argmax(const vec_t *v)
 {
     assert(vec_is_valid(v));
 
-    FLT_TYP max = v->pyl->arr[v->start];
+    FLT_TYP max = v->pyl->arr[v->offset];
     IND_TYP j_m = 0;
     for (IND_TYP j = 1; j < v->d; j++)
     {
-        IND_TYP i = v->start + j * v->step;
+        IND_TYP i = v->offset + j * v->step;
         if (v->pyl->arr[i] > max)
         {
             max = v->pyl->arr[i];
@@ -497,7 +533,7 @@ FLT_TYP *vec_at(const vec_t *v, IND_TYP i)
         i += v->d;
     assert(i >= 0 && i < v->d);
 
-    return v->pyl->arr + (v->start + i * v->step);
+    return v->pyl->arr + (v->offset + i * v->step);
 }
 
 vec_t *vec_addto(vec_t *v_dst, const vec_t *v_right)
@@ -507,8 +543,8 @@ vec_t *vec_addto(vec_t *v_dst, const vec_t *v_right)
     assert(v_dst->d == v_right->d);
 
     AXPY(v_dst->d, 1,
-         v_right->pyl->arr + v_right->start, v_right->step,
-         v_dst->pyl->arr + v_dst->start, v_dst->step);
+         v_right->pyl->arr + v_right->offset, v_right->step,
+         v_dst->pyl->arr + v_dst->offset, v_dst->step);
 
     return v_dst;
 }
@@ -520,8 +556,8 @@ vec_t *vec_subfrom(vec_t *v_dst, const vec_t *v_right)
     assert(v_dst->d == v_right->d);
 
     AXPY(v_dst->d, -1,
-         v_right->pyl->arr + v_right->start, v_right->step,
-         v_dst->pyl->arr + v_dst->start, v_dst->step);
+         v_right->pyl->arr + v_right->offset, v_right->step,
+         v_dst->pyl->arr + v_dst->offset, v_dst->step);
 
     return v_dst;
 }
@@ -538,14 +574,14 @@ FLT_TYP vec_norm_2(const vec_t *v)
 {
     assert(vec_is_valid(v));
 
-    return NRM2(v->d, v->pyl->arr + v->start, v->step);
+    return NRM2(v->d, v->pyl->arr + v->offset, v->step);
 }
 
 FLT_TYP vec_norm_1(const vec_t *v)
 {
     assert(vec_is_valid(v));
 
-    return ASUM(v->d, v->pyl->arr + v->start, v->step);
+    return ASUM(v->d, v->pyl->arr + v->offset, v->step);
 }
 
 FLT_TYP vec_sum(const vec_t *v)
@@ -554,7 +590,7 @@ FLT_TYP vec_sum(const vec_t *v)
 
     FLT_TYP one = 1;
     return DOT(v->d,
-               v->pyl->arr + v->start, v->step,
+               v->pyl->arr + v->offset, v->step,
                &one, 0);
 }
 
@@ -567,8 +603,8 @@ vec_t *vec_sign(vec_t *result, const vec_t *v)
     FLT_TYP one = 1;
     VCOPYSIGNI(v->d,
                &one, 0,
-               v->pyl->arr + v->start, v->step,
-               result->pyl->arr + result->start, result->step);
+               v->pyl->arr + v->offset, v->step,
+               result->pyl->arr + result->offset, result->step);
 
     return result;
 }
@@ -582,8 +618,8 @@ vec_t *vec_theta(vec_t *result, const vec_t *v)
     FLT_TYP half = 0.5;
     VCOPYSIGNI(v->d,
                &half, 0,
-               v->pyl->arr + v->start, v->step,
-               result->pyl->arr + result->start, result->step);
+               v->pyl->arr + v->offset, v->step,
+               result->pyl->arr + result->offset, result->step);
     vec_f_addto(result, 0.5);
 
     return result;
@@ -596,8 +632,8 @@ FLT_TYP vec_dot(const vec_t *v_1, const vec_t *v_2)
     assert(v_1->d == v_2->d);
 
     return DOT(v_1->d,
-               v_1->pyl->arr + v_1->start, v_1->step,
-               v_2->pyl->arr + v_2->start, v_2->step);
+               v_1->pyl->arr + v_1->offset, v_1->step,
+               v_2->pyl->arr + v_2->offset, v_2->step);
 }
 
 bool vec_is_close(const vec_t *v_1, const vec_t *v_2, FLT_TYP eps)
@@ -627,7 +663,7 @@ vec_t *vec_apply(vec_t *v, FLT_TYP (*map)(FLT_TYP))
 
     for (IND_TYP j = 0; j < v->d; j++)
     {
-        IND_TYP i = v->start + j * v->step;
+        IND_TYP i = v->offset + j * v->step;
         v->pyl->arr[i] = map(v->pyl->arr[i]);
     }
 
@@ -656,7 +692,7 @@ uint8_t *vec_serialize(const vec_t *v, uint8_t *byte_arr)
     byte_arr += sz;
     sz = v->d * sizeof(FLT_TYP);
     COPY(v->d,
-         v->pyl->arr + v->start, v->step,
+         v->pyl->arr + v->offset, v->step,
          (FLT_TYP *)byte_arr, 1);
     byte_arr += sz;
     return byte_arr;

@@ -1,0 +1,16 @@
+--2023-11-10 23:37:36--  https://update.code.visualstudio.com/commit:1a5daa3a0231a0fbba4f14db7ec463cf99d7768e/server-linux-x64/stable
+Resolving update.code.visualstudio.com (update.code.visualstudio.com)... 13.107.213.70, 13.107.246.70, 2620:1ec:46::70, ...
+Connecting to update.code.visualstudio.com (update.code.visualstudio.com)|13.107.213.70|:443... connected.
+HTTP request sent, awaiting response... 302 Found
+Location: https://az764295.vo.msecnd.net/stable/1a5daa3a0231a0fbba4f14db7ec463cf99d7768e/vscode-server-linux-x64.tar.gz [following]
+--2023-11-10 23:37:36--  https://az764295.vo.msecnd.net/stable/1a5daa3a0231a0fbba4f14db7ec463cf99d7768e/vscode-server-linux-x64.tar.gz
+Resolving az764295.vo.msecnd.net (az764295.vo.msecnd.net)... 152.199.4.33
+Connecting to az764295.vo.msecnd.net (az764295.vo.msecnd.net)|152.199.4.33|:443... connected.
+HTTP request sent, awaiting response... 200 OK
+Length: 51117717 (49M) [application/gzip]
+Saving to: ‘/home/mear/.vscode-server/bin/1a5daa3a0231a0fbba4f14db7ec463cf99d7768e-1699684656.tar.gz’
+
+               /home/mear/.vs   0%[                                                  ]       0  --.-KB/s                             /home/mear/.vsc   2%[>                                                 ]   1.23M  6.05MB/s                            /home/mear/.vsco  14%[======>                                           ]   6.99M  17.2MB/s                           /home/mear/.vscod  25%[===========>                                      ]  12.65M  20.9MB/s                          /home/mear/.vscode  37%[=================>                                ]  18.33M  22.7MB/s                         /home/mear/.vscode-  49%[=======================>                          ]  24.37M  24.2MB/s                        /home/mear/.vscode-s  61%[=============================>                    ]  30.19M  25.0MB/s                       /home/mear/.vscode-se  73%[===================================>              ]  35.99M  25.6MB/s                      /home/mear/.vscode-ser  85%[=========================================>        ]  41.67M  25.9MB/s                     /home/mear/.vscode-serv  93%[=============================================>    ]  45.41M  25.1MB/s               /home/mear/.vscode-server/bin 100%[=================================================>]  48.75M  26.0MB/s    in 1.9s    
+
+2023-11-10 23:37:38 (26.0 MB/s) - ‘/home/mear/.vscode-server/bin/1a5daa3a0231a0fbba4f14db7ec463cf99d7768e-1699684656.tar.gz’ saved [51117717/51117717]
+

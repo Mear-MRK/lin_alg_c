@@ -27,7 +27,9 @@
 #define VADDI vsAddI
 #define VSUB vsSub
 #define VSUBI vsSubI
+#define VSQR vsSqr
 #define VSQRI vsSqrI
+#define VSQRT vsSqrt
 #define VSQRTI vsSqrtI
 #define VEXP vsExp
 #define VEXPI vsExpI
@@ -57,7 +59,9 @@
 #define VADDI vdAddI
 #define VSUB vdSub
 #define VSUBI vdSubI
+#define VSQR vdSqr
 #define VSQRI vdSqrI
+#define VSQRT vdSqrt
 #define VSQRTI vdSqrtI
 #define VEXP vdExp
 #define VEXPI vdExpI
