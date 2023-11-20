@@ -17,7 +17,10 @@ mat_t *vec_outer(mat_t *result, const vec_t *v_left, const vec_t *v_right);
 // target += alpha * v_left (*) v_right : (*) = outer product
 mat_t *mat_update_outer(mat_t *target, FLT_TYP alpha, const vec_t *v_left, const vec_t *v_right);
 
-// Give vec_t corresponing to row i: array is shared
-// vec_t *mat_row_at(mat_t *m, vec_t *row, IND_TYP i);
+// Give vec_t corresponing to row i; payload is shared
+vec_t *mat_row_at(mat_t *m, vec_t *row, IND_TYP i);
+
+// Give vec_t corresponing to column j; payload is shared
+vec_t *mat_column_at(mat_t *m, vec_t *col, IND_TYP j);
 
 #endif /* VEC_MAT_H_INCLUDED */

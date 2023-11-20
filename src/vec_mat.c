@@ -68,3 +68,33 @@ mat_t *mat_update_outer(mat_t *target, FLT_TYP alpha, const vec_t *v_left, const
 
     return target;
 }
+
+vec_t *mat_row_at(mat_t *m, vec_t *row, IND_TYP i)
+{
+    assert(mat_is_valid(m));
+    assert(row);
+    payload_release(row->pyl);
+    if (i < 0)
+        i += m->d1;
+    assert(i >= 0 && i < m->d1);
+    row->pyl = payload_share(m->pyl);
+    row->offset = m->offset + i * m->d2;
+    row->step = 1;
+    row->d = m->d2;
+    return row;
+}
+
+vec_t *mat_column_at(mat_t *m, vec_t *col, IND_TYP j)
+{
+    assert(mat_is_valid(m));
+    assert(col);
+    payload_release(col->pyl);
+    if (j < 0)
+        j += m->d2;
+    assert(j >= 0 && j < m->d2);
+    col->pyl = payload_share(m->pyl);
+    col->offset = m->offset + j;
+    col->step = m->d2;
+    col->d = m->d1;
+    return col;
+}
