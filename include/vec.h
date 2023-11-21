@@ -40,7 +40,7 @@ bool vec_is_valid(const vec_t *v);
  */
 vec_t *vec_construct(vec_t *v, IND_TYP d);
 
-vec_t *vec_construct_prealloc(vec_t *v, payload_t *pyl, IND_TYP start, IND_TYP stop, IND_TYP step);
+vec_t *vec_construct_prealloc(vec_t *v, payload_t *pyl, IND_TYP offset, IND_TYP d, IND_TYP step);
 
 /*
  * Frees v->pyl->arr and sets *v = vec_NULL.
@@ -65,6 +65,8 @@ vec_t* vec_construct_nil(vec_t* v, IND_TYP d);
 vec_t* vec_construct_unit(vec_t* v, IND_TYP d, IND_TYP i);
 vec_t* vec_construct_copy(vec_t* v, const vec_t* oth);
 */
+
+vec_t *vec_reform(vec_t *v, IND_TYP offset, IND_TYP d, IND_TYP step);
 
 vec_t *vec_view(vec_t *view, const vec_t *src, IND_TYP start, IND_TYP stop, IND_TYP step);
 

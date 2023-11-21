@@ -25,6 +25,8 @@ mat_t *mat_construct(mat_t *m, IND_TYP d1, IND_TYP d2);
 
 mat_t *mat_construct_prealloc(mat_t *m, payload_t *pyl, IND_TYP d1, IND_TYP d2, IND_TYP offset);
 
+mat_t *mat_reform(mat_t *m, IND_TYP d1, IND_TYP d2, IND_TYP offset);
+
 mat_t *mat_view(mat_t *m, const mat_t *src, IND_TYP offset, IND_TYP d1, IND_TYP d2);
 
 mat_t *mat_view_new(const mat_t *src, IND_TYP offset, IND_TYP d1, IND_TYP d2);

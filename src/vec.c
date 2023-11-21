@@ -52,31 +52,44 @@ vec_t *vec_construct(vec_t *v, IND_TYP d)
     return v;
 }
 
-vec_t *vec_construct_prealloc(vec_t *v, payload_t *pyl, IND_TYP start, IND_TYP stop, IND_TYP step)
+vec_t *vec_construct_prealloc(vec_t *v, payload_t *pyl, IND_TYP offset, IND_TYP d, IND_TYP step)
 {
     assert(v);
     assert(payload_is_valid(pyl));
 
-    if (stop < 0)
-        stop += pyl->size;
-    if (start < 0)
-        start += pyl->size;
+    IND_TYP end = offset + step * (d-1);
 
-    if (start < 0 ||
-        stop > pyl->size ||
-        step == 0 ||
-        stop == start ||
-        stop > start && step < 0 ||
-        stop < start && step > 0)
+    if (d <= 0 ||
+        offset < 0 || offset >= pyl->size ||
+        end >= pyl->size || end < 0 ||
+        end > offset && step < 0 || end < offset && step > 0 ||
+        !payload_is_valid(pyl))
     {
         *v = vec_NULL;
         return v;
     }
-    v->offset = start;
+    v->offset = offset;
     v->step = step;
-    v->d = (stop - start) / step + (IND_TYP)(0 != ((stop - start) % step));
+    v->d = d;
     v->pyl = payload_share(pyl);
 
+    return v;
+}
+
+vec_t *vec_reform(vec_t *v, IND_TYP offset, IND_TYP d, IND_TYP step)
+{
+    assert(vec_is_valid(v));
+    assert(offset >= 0 && offset < v->pyl->size);
+    assert(d > 0);
+    assert(step != 0);
+#ifdef DEBUG
+    IND_TYP end = offset + step * (d-1);
+    assert(end >= 0 && end < v->pyl->size);
+    assert(end == offset || end > offset && step > 0 || end < offset && step < 0);
+#endif
+    v->offset = offset;
+    v->d = d;
+    v->step = step;
     return v;
 }
 

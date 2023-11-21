@@ -135,18 +135,17 @@ void vec_test(void)
     puts("+++ vec_test +++");
     char str_buff[4096] = {0};
 
-    FLT_TYP a_arr[3] = {1, 2, 3};
-    FLT_TYP b_arr[3] = {-1, 1, 2};
-
     vec_t va = vec_NULL;
     vec_t vb = vec_NULL;
     vec_t* vr = vec_new(3);
 
 
     vec_construct(&va, 3);
-    vec_copy_arr(&va, a_arr);
-    vec_construct(&vb, 3);
-    vec_copy_arr(&vb, b_arr);
+    vec_copy_arr(&va, (FLT_TYP[]){1, 2, 3});
+    // vec_construct(&vb, 3);
+    payload_t pyl_b;
+    payload_prealloc(&pyl_b, (FLT_TYP[]){-10, -1, -10, 1, -10, 2, -10}, 7);
+    vec_construct_prealloc(&vb, &pyl_b, 1, 3, 2);
 
     printf("va: %s, norm2: %g, norm1: %g, sum: %g\n", vec_to_str(&va, str_buff)
         , vec_norm_2(&va), vec_norm_1(&va), vec_sum(&va));
@@ -171,14 +170,22 @@ void vec_test(void)
     printf("va=exp(va): %s\n", vec_to_str(&va, str_buff));
     vec_sclmul(&va, &vb, 3.14f);
     printf("va=vb*3.14: %s\n", vec_to_str(&va, str_buff));
+    
+    vec_t* vw = vec_new_view(&vb, 0, vb.d, 2);
+    printf("vw=view(vb): %s\n", vec_to_str(vw, str_buff));
+    vec_fill(vw, 111);
+    printf("vw=111; vb: %s\n", vec_to_str(&vb, str_buff)); 
 
+    vec_del(vw);
     vec_del(vr);
     vec_destruct(&va);
     vec_destruct(&vb);
+    payload_release(&pyl_b);
 
     // fill_vec_test();
     
     relu_test();
+    sigmoid_test();
 
     puts("^^^ vec_test ^^^");
 }
