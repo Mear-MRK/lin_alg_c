@@ -33,7 +33,7 @@ void mat_transposition_test(void)
     payload_prealloc(&pyl, arr, 6);
     // assert(payload_is_valid(&pyl));
     mat_t m = mat_NULL;
-    mat_construct_prealloc(&m, &pyl, 2, 3, 0);
+    mat_construct_prealloc(&m, &pyl, 0, 2, 3);
     printf("m: d1:%ld d2:%ld off:%ld sz:%ld pyl:%p pyl_sz:%ld\n", m.d1, m.d2, m.offset, m.size,
            m.pyl, m.pyl->size);
     // assert(mat_is_valid(&m));
