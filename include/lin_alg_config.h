@@ -1,5 +1,4 @@
-#ifndef LIN_ALG_CONFIG_H_INCLUDED
-#define LIN_ALG_CONFIG_H_INCLUDED 1
+#pragma once
 
 #include <stdint.h>
 
@@ -12,9 +11,11 @@
 
 #ifdef INT32
 #define IND_TYP int32_t
+#define MAX_IND INT32_MAX
+#define MIN_IND INT32_MIN
 #else
 #define INT64 64
 #define IND_TYP int64_t
+#define MAX_IND INT64_MAX
+#define MIN_IND INT64_MIN
 #endif 
-
-#endif /* LIN_ALG_CONFIG_H_INCLUDED */

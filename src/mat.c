@@ -185,9 +185,21 @@ mat_t *mat_fill_zero(mat_t *m)
 mat_t *mat_fill_rnd(mat_t *m, FLT_TYP (*rnd)(void))
 {
     assert(mat_is_valid(m));
+    assert(rnd);
 
     for (IND_TYP i = 0; i < m->size; i++)
         m->pyl->arr[m->offset + i] = rnd();
+
+    return m;
+}
+
+mat_t *mat_fill_gen(mat_t *m, FLT_TYP (*gen)(const void *param), const void *param)
+{
+    assert(mat_is_valid(m));
+    assert(gen);
+
+    for (IND_TYP i = 0; i < m->size; i++)
+        m->pyl->arr[m->offset + i] = gen(param);
 
     return m;
 }

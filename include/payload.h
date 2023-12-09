@@ -13,8 +13,10 @@ typedef struct payload_struct
     unsigned flags;
 } payload_t;
 
-#define PAYLOAD_FLG_NEW 1u
-#define PAYLOAD_FLG_PREALLOC 2u
+#define payload_FLG_NEW 1u
+#define payload_FLG_PREALLOC 2u
+#define payload_FLG_RESIZABLE 4u
+#define payload_FLG_SHRINKABLE 8u
 
 #define payload_NULL ((const payload_t){.size = 0, .arr = NULL, .ref_count = 0, .flags = 0u})
 
@@ -33,3 +35,5 @@ payload_t *payload_prealloc(payload_t *pyl, FLT_TYP *arr, size_t size);
 payload_t *payload_share(payload_t *pyl);
 
 void payload_release(payload_t *pyl);
+
+payload_t *payload_resize(payload_t *pyl, size_t new_size);

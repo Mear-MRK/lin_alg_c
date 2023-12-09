@@ -43,6 +43,8 @@ mat_t *mat_fill_zero(mat_t *m);
 
 mat_t *mat_fill_rnd(mat_t *m, FLT_TYP (*rnd)(void));
 
+mat_t *mat_fill_gen(mat_t *m, FLT_TYP (*gen)(const void *param), const void *param);
+
 mat_t *mat_add(mat_t *result, const mat_t *m_left, const mat_t *m_right);
 
 mat_t *mat_sub(mat_t *result, const mat_t *m_left, const mat_t *m_right);

@@ -1,4 +1,3 @@
-
 #include "vec.h"
 
 #include <string.h>
@@ -62,7 +61,7 @@ vec_t *vec_construct_prealloc(vec_t *v, payload_t *pyl, IND_TYP offset, IND_TYP 
     if (d <= 0 ||
         offset < 0 || offset >= pyl->size ||
         end >= pyl->size || end < 0 ||
-        end > offset && step < 0 || end < offset && step > 0 ||
+        (end > offset && step < 0) || (end < offset && step > 0) ||
         !payload_is_valid(pyl))
     {
         *v = vec_NULL;
@@ -85,7 +84,7 @@ vec_t *vec_reform(vec_t *v, IND_TYP offset, IND_TYP d, IND_TYP step)
 #ifdef DEBUG
     IND_TYP end = offset + step * (d-1);
     assert(end >= 0 && end < v->pyl->size);
-    assert(end == offset || end > offset && step > 0 || end < offset && step < 0);
+    assert(end == offset || (end > offset && step > 0) || (end < offset && step < 0));
 #endif
     v->offset = offset;
     v->d = d;
@@ -116,8 +115,8 @@ vec_t *vec_view(vec_t *view, const vec_t *src, IND_TYP start, IND_TYP stop, IND_
 
     if (step == 0 ||
         stop == start ||
-        stop > start && step < 0 ||
-        stop < start && step > 0)
+        (stop > start && step < 0) ||
+        (stop < start && step > 0))
     {
         *view = vec_NULL;
         return view;
@@ -200,11 +199,25 @@ vec_t *vec_assign(vec_t *dst, const vec_t *src)
 vec_t *vec_fill_rnd(vec_t *v, FLT_TYP (*rnd)(void))
 {
     assert(vec_is_valid(v));
+    assert(rnd);
 
     for (IND_TYP j = 0; j < v->d; j++)
     {
         IND_TYP i = v->offset + j * v->step;
         v->pyl->arr[i] = rnd();
+    }
+    return v;
+}
+
+vec_t *vec_fill_gen(vec_t *v, FLT_TYP (*gen)(const void *), const void *param)
+{
+    assert(vec_is_valid(v));
+    assert(gen);
+
+    for (IND_TYP j = 0; j < v->d; j++)
+    {
+        IND_TYP i = v->offset + j * v->step;
+        v->pyl->arr[i] = gen(param);
     }
     return v;
 }
