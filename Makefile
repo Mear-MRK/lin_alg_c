@@ -5,12 +5,13 @@ SRCPATH = ./src
 BINPATH = ./bin
 OBJPATH = ./obj
 LIBPATH = ./lib
-EXT_INCPATH = /usr/include/mkl
-EXT_LIBPATH = /usr/lib/x86_64-linux-gnu
 
 DESTPATH = ${HOME}
 LIBINSTPATH = ${DESTPATH}/lib
 INCINSTPATH = ${DESTPATH}/include/${PRJNAME}
+
+EXT_INCPATH_FLG = -I/usr/include/mkl -I$(DESTPATH)/include
+EXT_LIBPATH_FLG = -L/usr/lib/x86_64-linux-gnu -L$(LIBINSTPATH)
 
 RLS_FLT32_LIB = $(PRJNAME)_flt32
 RLS_FLT64_LIB = $(PRJNAME)_flt64
@@ -21,14 +22,14 @@ CC = gcc
 LD = gcc
 AR = ar
 
-COM_CFLAGS = -m64 -std=c11 -Wall -Wextra -I$(INCPATH) -I$(EXT_INCPATH)
+COM_CFLAGS = -m64 -std=c11 -Wall -Wextra -I$(INCPATH) $(EXT_INCPATH_FLG)
 OPT_CFLAGS = -flto -O3
 
 RLS_CFLAGS = -DNDEBUG $(COM_CFLAGS) $(OPT_CFLAGS)
-RLS_LDFLAGS = $(OPT_CFLAGS) -L$(LIBPATH) -L$(EXT_LIBPATH)
+RLS_LDFLAGS = $(OPT_CFLAGS) -L$(LIBPATH) $(EXT_LIBPATH_FLG)
 DBG_CFLAGS = -DDEBUG -g $(COM_CFLAGS) 
-DBG_LDFLAGS = -L$(LIBPATH) -L$(EXT_LIBPATH) -g
-LD_LIBS = -lmkl_rt -lm
+DBG_LDFLAGS = -L$(LIBPATH) $(EXT_LIBPATH_FLG) -g
+LD_LIBS = $(LIBINSTPATH)/log.o -lmkl_rt -lm
 # -Wl,--no-as-needed -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -liomp5 -lpthread -lm -ldl
 
 CFILES = $(wildcard $(SRCPATH)/*.c)

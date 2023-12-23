@@ -2,6 +2,11 @@
 
 #include <assert.h>
 #include <stdio.h>
+#include <string.h>
+
+#include "log.h"
+
+#define MIN(x, y) ((x) <= (y) ? (x) : (y))
 
 bool payload_is_valid(const payload_t *pyl)
 {
@@ -117,9 +122,7 @@ void payload_release(payload_t *pyl)
     }
     else if (pyl->ref_count < 0)
     {
-#ifdef DEBUG
-        fprintf(stderr, "payload_release: WARN ref_count is negative: %d\n", pyl->ref_count);
-#endif
+        log_msg(LOG_ERR, "payload_release: ref_count is negative: %d\n", pyl->ref_count);
     }
 }
 
@@ -133,7 +136,7 @@ payload_t *payload_resize(payload_t *pyl, size_t new_size)
              !(pyl->flags & payload_FLG_RESIZABLE) ||
              (new_size < pyl->size && !(pyl->flags & payload_FLG_SHRINKABLE)))
         return NULL;
-    
+
     void *ptr = NULL;
     ptr = realloc(pyl->arr, new_size);
     assert(ptr);
@@ -142,4 +145,22 @@ payload_t *payload_resize(payload_t *pyl, size_t new_size)
     pyl->arr = (FLT_TYP *)ptr;
     pyl->size = new_size;
     return pyl;
+}
+
+size_t payload_copy(payload_t *dest, size_t dest_off, const payload_t *src, size_t src_off, size_t cp_size)
+{
+    assert(payload_is_valid(dest));
+    assert(payload_is_valid(src));
+    assert(src_off < src->size);
+    assert(dest_off < dest->size);
+
+    if (cp_size == 0)
+        cp_size = src->size - src_off;
+    else
+        cp_size = MIN(cp_size, src->size - src_off);
+    cp_size = MIN(cp_size, dest->size - dest_off);
+
+    memcpy(dest->arr + dest_off, src->arr + src_off, cp_size * sizeof(FLT_TYP));
+
+    return cp_size;
 }

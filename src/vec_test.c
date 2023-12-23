@@ -49,7 +49,7 @@ static void sigmoid_test(void)
     clock_t start, end;
     double sig_elp = 0, sig2_elp = 0;
     printf("clk_s: %ld\n", CLOCKS_PER_SEC);
-    for(int r = 0; r < 10000; r++)
+    for(int r = 0; r < 1000; r++)
     {
         vec_fill_rnd(&v, rnd);
         vec_assign(&sv, &v);

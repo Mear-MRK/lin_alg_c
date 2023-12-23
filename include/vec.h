@@ -6,7 +6,16 @@
 #include "payload.h"
 #include "lin_alg_config.h"
 
-/*
+
+/**
+ * vec_t - Vector type.
+ *
+ * This struct represents a vector with elements of type FLT_TYP.
+ * It contains:
+ * - pyl: Pointer to the payload containing the actual vector data.
+ * - d: Dimension of the vector.
+ * - offset: Index offset for this vector into pyl's data array.
+ * - step: Step size between successive elements.
  */
 typedef struct vec_struct
 {
@@ -28,8 +37,11 @@ typedef struct vec_struct
  */
 bool vec_is_null(const vec_t *v);
 
-/*
-*/
+/**
+ * Checks if the given vector v is valid.
+ *
+ * Valid means v is not NULL, v->d > 0, and v->pyl is not NULL.
+ */
 bool vec_is_valid(const vec_t *v);
 
 /*
@@ -40,6 +52,19 @@ bool vec_is_valid(const vec_t *v);
  */
 vec_t *vec_construct(vec_t *v, IND_TYP d);
 
+/**
+ * Constructs vector v by pre-allocating its payload pyl.
+ *
+ * This sets v's pyl, offset, dimension d and step. The values in pyl->arr are not initialized.
+ * Caller must ensure pyl->arr has sufficient allocated space for the vector.
+ *
+ * @param v Vector to construct by pre-allocation.
+ * @param pyl Payload with pre-allocated array to use.
+ * @param offset Index offset into pyl's array for this vector.
+ * @param d Dimension of the vector.
+ * @param step Step size between successive elements.
+ * @return v
+ */
 vec_t *vec_construct_prealloc(vec_t *v, payload_t *pyl, IND_TYP offset, IND_TYP d, IND_TYP step);
 
 /*
@@ -66,8 +91,29 @@ vec_t* vec_construct_unit(vec_t* v, IND_TYP d, IND_TYP i);
 vec_t* vec_construct_copy(vec_t* v, const vec_t* oth);
 */
 
+/**
+ * Reforms the vector v by changing its dimension, offset and step size.
+ * The values in v->pyl->arr are unchanged.
+ *
+ * @param v Vector to reform
+ * @param offset New offset into pyl->arr
+ * @param d New dimension
+ * @param step New step size
+ * @return Reformed v
+ */
 vec_t *vec_reform(vec_t *v, IND_TYP offset, IND_TYP d, IND_TYP step);
 
+/**
+ * Creates a view of the vector src from indices start to stop (exclusive)
+ * with given step size. The view shares src's payload.
+ *
+ * @param view The view vector to create
+ * @param src The source vector
+ * @param start The start index of the view
+ * @param stop The stop index of the view (exclusive)
+ * @param step The step size between indices
+ * @return The created view vector
+ */
 vec_t *vec_view(vec_t *view, const vec_t *src, IND_TYP start, IND_TYP stop, IND_TYP step);
 
 vec_t *vec_new_view(const vec_t *src, IND_TYP start, IND_TYP stop, IND_TYP step);
@@ -149,7 +195,7 @@ vec_t *vec_apply(vec_t *v, FLT_TYP (*map)(FLT_TYP));
 // result = exp(v)
 vec_t *vec_exp(vec_t *result, const vec_t *v);
 // reslut = ln(v)
-vec_t *vec_ln(vec_t *result, const vec_t *v);
+// vec_t *vec_ln(vec_t *result, const vec_t *v);
 // result = log2(v)
 vec_t *vec_log2(vec_t *result, const vec_t *v);
 // result = 1 / v (element-wise inversion)

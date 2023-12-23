@@ -56,6 +56,8 @@ vec_t *vec_construct_prealloc(vec_t *v, payload_t *pyl, IND_TYP offset, IND_TYP 
     assert(v);
     assert(payload_is_valid(pyl));
 
+    payload_release(v->pyl);
+
     IND_TYP end = offset + step * (d-1);
 
     if (d <= 0 ||
