@@ -37,11 +37,11 @@ void slice_test(void)
     prn_tst(s1, s2);
 
     slice_set(s1, 1, 8, 2);
-    slice_set(s2, -1, slice_MINUS_END, -1);
+    slice_set(s2, -1, slice_IND_M_INF, -1);
     prn_tst(s1, s2);
 
     slice_set(s1, -8, 4, 2);
-    slice_set(s2, 3, slice_PLUS_END, 1);
+    slice_set(s2, 3, slice_IND_P_INF, 1);
     prn_tst(s1, s2);
 
     slice_set(s1, -5, 4, 2);

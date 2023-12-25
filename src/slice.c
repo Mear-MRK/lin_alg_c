@@ -10,27 +10,78 @@ static inline bool same_sign(IND_TYP x, IND_TYP y)
     return (x >= 0 && y >= 0) || (x < 0 && y < 0);
 }
 
-static inline bool same_sign_diff(IND_TYP x, IND_TYP y, IND_TYP z)
+static inline bool same_diff_sign(IND_TYP x, IND_TYP y, IND_TYP z)
 {
-    return (x > y && z > 0) || (x < y && z < 0) || (x == y && z == 0);
+    return (x >= y && z >= 0) || (x < y && z < 0);
 }
 
-static inline bool ambiguous_sss(IND_TYP start, IND_TYP stop, IND_TYP step)
+static inline bool ambiguous_dir_sss(IND_TYP start, IND_TYP stop, IND_TYP step)
 {
     return (start < -1 && stop > 0) || (start > 0 && stop < -1);
 }
 
-static inline bool defined_ind(IND_TYP ind)
+static inline bool is_definite_ind(IND_TYP ind)
 {
-    return ind != slice_IND_UNDEF && ind != slice_PLUS_END && ind != slice_MINUS_END;
+    return ind != slice_IND_UNDEF && ind != slice_IND_P_INF && ind != slice_IND_M_INF;
 }
 
 static inline bool valid_sss(IND_TYP start, IND_TYP stop, IND_TYP step)
 {
-    return defined_ind(start) && stop != slice_IND_UNDEF && start != stop &&
-           (step < 0 && stop != slice_PLUS_END || step > 0 && stop != slice_MINUS_END) &&
-           (stop == slice_PLUS_END || stop == slice_MINUS_END ||
-            same_sign_diff(stop, start, step) || ambiguous_sss(start, stop, step));
+    return is_definite_ind(start) && stop != slice_IND_UNDEF && start != stop && step != 0 &&
+           ((step < 0 && stop != slice_IND_P_INF) || (step > 0 && stop != slice_IND_M_INF)) &&
+           (stop == slice_IND_P_INF || stop == slice_IND_M_INF ||
+            same_diff_sign(stop, start, step) || ambiguous_dir_sss(start, stop, step));
+}
+
+static IND_TYP sly_idx(const slice_t *sly, IND_TYP i)
+{
+    assert(slice_is_valid(sly));
+
+    if (i == slice_IND_UNDEF)
+        return slice_IND_UNDEF;
+    else if (i == slice_IND_P_INF)
+        return sly->stop;
+    else if (i == slice_IND_M_INF)
+        if (sly->step >= 0)
+        {
+            IND_TYP index = sly->start - sly->step;
+            return (same_sign(index, sly->start)) ? index : slice_IND_M_INF;
+        }
+        else
+        {
+            IND_TYP index = sly->start + sly->step;
+            return (same_sign(index, sly->start)) ? index : slice_IND_P_INF;
+        }
+
+    if (i >= 0)
+    {
+        if (sly->len != slice_IND_UNDEF && i >= sly->len)
+            return (sly->step >= 0) ? slice_IND_P_INF : slice_IND_M_INF;
+        IND_TYP index = sly->start + sly->step * i;
+        if (same_sign(index, sly->start))
+            return index;
+        else
+            return slice_IND_UNDEF;
+    }
+    else if (sly->len != slice_IND_UNDEF)
+        if (i >= -sly->len)
+            return sly->start + sly->step * (sly->len + i);
+        else
+            return (sly->step >= 0) ? slice_IND_M_INF : slice_IND_P_INF;
+    else if (is_definite_ind(sly->stop))
+    {
+        IND_TYP index = sly->stop + i * sly->step;
+        if (same_sign(index, sly->stop))
+            return index;
+        else
+            return slice_IND_UNDEF;
+    }
+    else
+    {
+        return (sly->stop == slice_IND_P_INF) ? i * sly->step : i * sly->step - 1;
+    }
+
+    return slice_IND_UNDEF;
 }
 
 bool slice_is_none(const slice_t *sly)
@@ -45,8 +96,13 @@ bool slice_is_null(const slice_t *sly)
 
 bool slice_is_valid(const slice_t *sly)
 {
-    return sly &&
-           valid_sss(sly->start, sly->stop, sly->step);
+    return sly && (slice_is_null(sly) || valid_sss(sly->start, sly->stop, sly->step));
+}
+
+bool slice_is_regulated(const slice_t *slice)
+{
+    assert(slice);
+    return slice->len >= 0 && slice->len != slice_IND_UNDEF;
 }
 
 slice_t *slice_set(slice_t *sly, IND_TYP start, IND_TYP stop, IND_TYP step)
@@ -55,12 +111,12 @@ slice_t *slice_set(slice_t *sly, IND_TYP start, IND_TYP stop, IND_TYP step)
 
     // if (start == slice_IND_UNDEF)
     //     start = (step >= 0) ? 0 : -1;
-    // else if (start == slice_PLUS_END)
+    // else if (start == slice_AFTER)
     //     start = -1;
-    // else if (start == slice_MINUS_END)
+    // else if (start == slice_BEFORE)
     //     start = 0;
     // if (stop == slice_IND_UNDEF)
-    //     stop = (step >= 0) ? slice_PLUS_END : slice_MINUS_END;
+    //     stop = (step >= 0) ? slice_AFTER : slice_BEFORE;
 
     // assert(valid_sss(start, stop, step));
 
@@ -76,17 +132,17 @@ slice_t *slice_set(slice_t *sly, IND_TYP start, IND_TYP stop, IND_TYP step)
 
     sly->len = slice_IND_UNDEF;
 
-    if (stop != slice_PLUS_END && stop != slice_MINUS_END && same_sign(start, stop))
+    if (stop != slice_IND_P_INF && stop != slice_IND_M_INF && same_sign(start, stop))
     {
         sly->len = (stop - start) / step + ((stop - start) % step != 0);
         sly->stop = start + step * sly->len;
     }
-    else if (stop == slice_PLUS_END && start < 0)
+    else if (stop == slice_IND_P_INF && start < 0)
     {
         sly->len = (-start) / step + ((-start) % step != 0);
         sly->stop = stop;
     }
-    else if (stop == slice_MINUS_END && start >= 0)
+    else if (stop == slice_IND_M_INF && start >= 0)
     {
         sly->len = (start + 1) / (-step) + ((start + 1) % (-step) != 0);
         sly->stop = stop;
@@ -103,55 +159,23 @@ slice_t *slice_set(slice_t *sly, IND_TYP start, IND_TYP stop, IND_TYP step)
 IND_TYP slice_index(const slice_t *sly, IND_TYP i)
 {
     assert(slice_is_valid(sly));
-
-    if (i == slice_IND_UNDEF)
+    if (sly->len == slice_IND_UNDEF || i == slice_IND_UNDEF || i >= sly->len || i < -sly->len)
         return slice_IND_UNDEF;
-    else if (i == slice_PLUS_END)
-        return sly->stop;
-    else if (i == slice_MINUS_END)
-        if (sly->step >= 0)
-        {
-            IND_TYP index = sly->start - sly->step;
-            return (same_sign(index, sly->start)) ? index : slice_MINUS_END;
-        }
-        else
-        {
-            IND_TYP index = sly->start + sly->step;
-            return (same_sign(index, sly->start)) ? index : slice_PLUS_END;
-        }
 
-    if (i >= 0)
-    {
-        if (sly->len != slice_IND_UNDEF && i >= sly->len)
-            return (sly->step >= 0) ? slice_PLUS_END : slice_MINUS_END;
-        IND_TYP index = sly->start + sly->step * i;
-        if (same_sign(index, sly->start))
-            return index;
-        else
-            return slice_IND_UNDEF;
-    }
-    else if (sly->len != slice_IND_UNDEF)
-        if (i >= -sly->len)
-            return sly->start + sly->step * (sly->len + i);
-        else
-            return (sly->step >= 0) ? slice_MINUS_END : slice_PLUS_END;
-    else if (defined_ind(sly->stop))
-    {
-        IND_TYP index = sly->stop + i * sly->step;
-        if (same_sign(index, sly->stop))
-            return index;
-        else 
-            return slice_IND_UNDEF;
-    } else {
-        return (sly->stop == slice_PLUS_END) ? i * sly->step : i * sly->step - 1; 
-    }
-
-    return slice_IND_UNDEF;
+    return sly->start + sly->step * (i + ((i >= 0) ? 0 : sly->len));
 }
 
 slice_t *slice_combine(slice_t *result, const slice_t *base, const slice_t *over)
 {
     assert(result);
+    assert(base);
+    assert(over);
+
+    if (slice_is_null(base) || slice_is_null(over))
+    {
+        *result = slice_NULL;
+        return result;
+    }
     assert(slice_is_valid(base));
     assert(slice_is_valid(over));
 
@@ -163,17 +187,17 @@ slice_t *slice_combine(slice_t *result, const slice_t *base, const slice_t *over
     {
         slice_t cp_over = *over;
         slice_regulate(&cp_over, base->len);
-        start = slice_index(base, cp_over.start);
-        stop = slice_index(base, cp_over.stop);
+        start = sly_idx(base, cp_over.start);
+        stop = sly_idx(base, cp_over.stop);
     }
     else
     {
-        start = slice_index(base, over->start);
-        stop = slice_index(base, over->stop);
+        start = sly_idx(base, over->start);
+        stop = sly_idx(base, over->stop);
     }
-    if (stop == slice_PLUS_END && base->step >= 0 || stop == slice_MINUS_END && base->step < 0)
+    if ((stop == slice_IND_P_INF && base->step >= 0) || (stop == slice_IND_M_INF && base->step < 0))
         stop = base->stop;
-    if (start == slice_MINUS_END && base->step >= 0 || base->step < 0 && start == slice_PLUS_END)
+    if ((start == slice_IND_M_INF && base->step >= 0) || (base->step < 0 && start == slice_IND_P_INF))
         start = base->start;
 
     slice_set(result, start, stop, step);
@@ -181,33 +205,41 @@ slice_t *slice_combine(slice_t *result, const slice_t *base, const slice_t *over
     return result;
 }
 
-slice_t *slice_regulate(slice_t *sly, IND_TYP d)
+slice_t *slice_regulate(slice_t *sly, IND_TYP len)
 {
+    assert(len >= 0);
+
+    if (slice_is_null(sly))
+        return sly;
+    if (len <= 0)
+    {
+        *sly = slice_NULL;
+        return sly;
+    }
     assert(slice_is_valid(sly));
-    assert(d > 0);
 
     if (sly->start < 0)
-        sly->start += d;
-    if (sly->stop < 0 && defined_ind(sly->stop))
-        sly->stop += d;
+        sly->start += len;
+    if (sly->stop < 0 && is_definite_ind(sly->stop))
+        sly->stop += len;
 
     if (sly->step > 0)
     {
         if (sly->start < 0)
             sly->start = 0;
-        if (sly->stop > d || sly->stop == slice_PLUS_END)
-            sly->stop = d;
+        if (sly->stop > len || sly->stop == slice_IND_P_INF)
+            sly->stop = len;
     }
     else
     {
-        if (sly->start >= d)
-            sly->start = d - 1;
-        if (sly->stop < -1 || sly->stop == slice_MINUS_END)
+        if (sly->start >= len)
+            sly->start = len - 1;
+        if (sly->stop < -1 || sly->stop == slice_IND_M_INF)
             sly->stop = -1;
     }
 
-    if (sly->start < 0 || sly->start >= d || sly->stop < -1 || sly->stop > d ||
-        !same_sign_diff(sly->stop, sly->start, sly->step))
+    if (sly->start < 0 || sly->start >= len || sly->stop < -1 || sly->stop > len ||
+        !same_diff_sign(sly->stop, sly->start, sly->step))
     {
         *sly = slice_NULL;
         return sly;
@@ -216,7 +248,7 @@ slice_t *slice_regulate(slice_t *sly, IND_TYP d)
     sly->len = (sly->stop - sly->start) / sly->step + ((sly->stop - sly->start) % sly->step != 0);
     sly->stop = sly->start + sly->step * sly->len;
     if (sly->stop < 0)
-        sly->stop = slice_MINUS_END;
+        sly->stop = slice_IND_M_INF;
 
     return sly;
 }
@@ -228,31 +260,31 @@ char *slice_to_str(const slice_t *sly, char *str)
 
     if (slice_is_null(sly))
     {
-        strcpy(str, "slice(NULL)");
+        strcpy(str, "slice_NULL");
         return str;
     }
     assert(slice_is_valid(sly));
 
     if (slice_is_none(sly))
     {
-        strcpy(str, "slice(NONE)");
+        strcpy(str, "slice_NONE");
         return str;
     }
 
     str[0] = 0;
     char buff[64] = {0};
     strcat(str, "slice(");
-    if (defined_ind(sly->start))
+    if (is_definite_ind(sly->start))
         sprintf(buff, "start=%ld ", sly->start);
     else
         strcpy(buff, "start=UNDEF ");
     strcat(str, buff);
-    if (defined_ind(sly->stop))
+    if (is_definite_ind(sly->stop))
         sprintf(buff, "stop=%ld ", sly->stop);
-    else if (sly->stop == slice_PLUS_END)
-        strcpy(buff, "stop=PLUS_END ");
-    else if (sly->stop == slice_MINUS_END)
-        strcpy(buff, "stop=MINUS_END ");
+    else if (sly->stop == slice_IND_P_INF)
+        strcpy(buff, "stop=AFTER ");
+    else if (sly->stop == slice_IND_M_INF)
+        strcpy(buff, "stop=BEFORE ");
     else
         strcpy(buff, "stop=UNDEF ");
     strcat(str, buff);
