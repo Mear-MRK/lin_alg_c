@@ -6,91 +6,91 @@
 #include "payload.h"
 #include "lin_alg_config.h"
 
-typedef struct mat_struct
+typedef struct mat
 {
-    payload_t *pyl;
+    payload *pyl;
     IND_TYP size;
     IND_TYP d1;
     IND_TYP d2;
     IND_TYP offset;
-} mat_t;
+} mat;
 
-#define mat_NULL ((const mat_t){.pyl = NULL, .size = 0, .d1 = 0, .d2 = 0, .offset = 0})
+#define mat_NULL ((const mat){.pyl = NULL, .size = 0, .d1 = 0, .d2 = 0, .offset = 0})
 
-bool mat_is_null(const mat_t *m);
+bool mat_is_null(const mat *m);
 
-bool mat_is_valid(const mat_t *m);
+bool mat_is_valid(const mat *m);
 
-mat_t *mat_construct(mat_t *m, IND_TYP d1, IND_TYP d2);
+mat *mat_construct(mat *m, IND_TYP d1, IND_TYP d2);
 
-mat_t *mat_construct_prealloc(mat_t *m, payload_t *pyl, IND_TYP offset, IND_TYP d1, IND_TYP d2);
+mat *mat_construct_prealloc(mat *m, payload *pyl, IND_TYP offset, IND_TYP d1, IND_TYP d2);
 
-mat_t *mat_reform(mat_t *m, IND_TYP offset, IND_TYP d1, IND_TYP d2);
+mat *mat_reform(mat *m, IND_TYP offset, IND_TYP d1, IND_TYP d2);
 
-mat_t *mat_view(mat_t *m, const mat_t *src, IND_TYP offset, IND_TYP d1, IND_TYP d2);
+mat *mat_view(mat *m, const mat *src, IND_TYP offset, IND_TYP d1, IND_TYP d2);
 
-mat_t *mat_view_new(const mat_t *src, IND_TYP offset, IND_TYP d1, IND_TYP d2);
+mat *mat_view_new(const mat *src, IND_TYP offset, IND_TYP d1, IND_TYP d2);
 
-void mat_destruct(mat_t *m);
+void mat_destruct(mat *m);
 
-mat_t *mat_new(IND_TYP d1, IND_TYP d2);
+mat *mat_new(IND_TYP d1, IND_TYP d2);
 
-void mat_del(mat_t *m);
+void mat_del(mat *m);
 
-mat_t *mat_assign(mat_t *m_dst, const mat_t *m_src);
+mat *mat_assign(mat *m_dst, const mat *m_src);
 
-mat_t *mat_fill_zero(mat_t *m);
+mat *mat_fill_zero(mat *m);
 
-mat_t *mat_fill_rnd(mat_t *m, FLT_TYP (*rnd)(void));
+mat *mat_fill_rnd(mat *m, FLT_TYP (*rnd)(void));
 
-mat_t *mat_fill_gen(mat_t *m, FLT_TYP (*gen)(const void *param), const void *param);
+mat *mat_fill_gen(mat *m, FLT_TYP (*gen)(const void *param), const void *param);
 
-mat_t *mat_add(mat_t *result, const mat_t *m_left, const mat_t *m_right);
+mat *mat_add(mat *result, const mat *m_left, const mat *m_right);
 
-mat_t *mat_sub(mat_t *result, const mat_t *m_left, const mat_t *m_right);
+mat *mat_sub(mat *result, const mat *m_left, const mat *m_right);
 
-mat_t *mat_mul(mat_t *result, const mat_t *m_left, const mat_t *m_right);
+mat *mat_mul(mat *result, const mat *m_left, const mat *m_right);
 
-mat_t *mat_div(mat_t *result, const mat_t *m_left, const mat_t *m_right);
+mat *mat_div(mat *result, const mat *m_left, const mat *m_right);
 
-mat_t *mat_dot(mat_t *result, const mat_t *m_left, const mat_t *m_right);
+mat *mat_dot(mat *result, const mat *m_left, const mat *m_right);
 
-mat_t *mat_addto(mat_t *m_target, const mat_t *m_right);
+mat *mat_addto(mat *m_target, const mat *m_right);
 // m += f
-mat_t *mat_f_addto(mat_t *m, FLT_TYP f);
+mat *mat_f_addto(mat *m, FLT_TYP f);
 
-mat_t *mat_subfrom(mat_t *m_target, const mat_t *m_right);
+mat *mat_subfrom(mat *m_target, const mat *m_right);
 
-mat_t *mat_mulby(mat_t *m_target, const mat_t *m_right);
+mat *mat_mulby(mat *m_target, const mat *m_right);
 
-mat_t *mat_scale(mat_t *m, FLT_TYP scale);
+mat *mat_scale(mat *m, FLT_TYP scale);
 // result = m^2 (element-wise)
-mat_t *mat_square(mat_t *result, const mat_t *m);
+mat *mat_square(mat *result, const mat *m);
 // result = sqrt(m)
-mat_t *mat_sqrt(mat_t *result, const mat_t *m);
+mat *mat_sqrt(mat *result, const mat *m);
 
-mat_t *mat_transpose(mat_t *result, const mat_t *target);
+mat *mat_transpose(mat *result, const mat *target);
 
-mat_t *mat_T(mat_t *m);
+mat *mat_T(mat *m);
 
-FLT_TYP mat_norm_2(const mat_t *m);
+FLT_TYP mat_norm_2(const mat *m);
 
-FLT_TYP mat_sum(const mat_t *m);
+FLT_TYP mat_sum(const mat *m);
 
-bool mat_is_close(const mat_t *m_1, const mat_t *m_2, FLT_TYP eps);
-// mat_t *mat_fill(mat_t *m, FLT_TYP value);
-// mat_t *mat_diag_init(mat_t *m, const vec_t *v);
+bool mat_is_close(const mat *m_1, const mat *m_2, FLT_TYP eps);
+// mat *mat_fill(mat *m, FLT_TYP value);
+// mat *mat_diag_init(mat *m, const vec *v);
 
-char *mat_to_str(const mat_t *m, char *str_buff);
+char *mat_to_str(const mat *m, char *str_buff);
 // trg += alpha * m_right
-mat_t *mat_update(mat_t *trg, FLT_TYP alpha, const mat_t *m_right);
+mat *mat_update(mat *trg, FLT_TYP alpha, const mat *m_right);
 // Gives pointer to m->ply->arr[i][j]; i or j can be negative
-FLT_TYP *mat_at(const mat_t *m, IND_TYP i, IND_TYP j);
+FLT_TYP *mat_at(const mat *m, IND_TYP i, IND_TYP j);
 // Replace trg at specified row i and below with src and returns nbr of rows replaced
-IND_TYP mat_insert(mat_t *trg, const mat_t *src, IND_TYP row_i);
+IND_TYP mat_insert(mat *trg, const mat *src, IND_TYP row_i);
 
-size_t mat_serial_size(const mat_t *m);
+size_t mat_serial_size(const mat *m);
 // Returns the pointer to the first byte just after the last written byte to byte_arr
-uint8_t *mat_serialize(const mat_t *m, uint8_t *byte_arr);
+uint8_t *mat_serialize(const mat *m, uint8_t *byte_arr);
 // Returns the pointer to the first byte just after the last read byte from byte_arr
-const uint8_t *mat_deserialize(mat_t *m, const uint8_t *byte_arr);
+const uint8_t *mat_deserialize(mat *m, const uint8_t *byte_arr);

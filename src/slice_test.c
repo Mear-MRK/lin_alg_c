@@ -3,10 +3,10 @@
 #include <stdio.h>
 #include <math.h>
 
-void prn_tst(slice_t *s1, slice_t *s2)
+void prn_tst(slice *s1, slice *s2)
 {
     char str[1024] = {0};
-    slice_t s = slice_NULL;
+    slice s = slice_NULL;
     printf("s1: %s\n", slice_to_str(s1, str));
     printf("s2: %s\n", slice_to_str(s2, str));
     slice_combine(&s, s1, &slice_NONE);
@@ -28,8 +28,8 @@ void slice_test(void)
 {
     puts("+++ slice_test +++");
 
-    slice_t *s1 = slice_new(1, 8, 2);
-    slice_t *s2 = slice_new(2, 5, 1);
+    slice *s1 = slice_new(1, 8, 2);
+    slice *s2 = slice_new(2, 5, 1);
     prn_tst(s1, s2);
 
     slice_set(s1, 1, 9, 2);

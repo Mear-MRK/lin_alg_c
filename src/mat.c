@@ -6,15 +6,15 @@
 
 #include "blaseng.h"
 
-bool mat_is_null(const mat_t *m)
+bool mat_is_null(const mat *m)
 {
     assert(m);
     if (!m)
         return false;
-    return memcmp(m, &mat_NULL, sizeof(mat_t)) == 0;
+    return memcmp(m, &mat_NULL, sizeof(mat)) == 0;
 }
 
-bool mat_is_valid(const mat_t *m)
+bool mat_is_valid(const mat *m)
 {
     return m &&
            !mat_is_null(m) &&
@@ -22,10 +22,10 @@ bool mat_is_valid(const mat_t *m)
            m->size == m->d1 * m->d2 &&
            m->offset >= 0 &&
            payload_is_valid(m->pyl) &&
-           m->pyl->size >= (m->offset + m->size);
+           m->pyl->size >= (size_t)(m->offset + m->size);
 }
 
-mat_t *mat_construct(mat_t *m, IND_TYP d1, IND_TYP d2)
+mat *mat_construct(mat *m, IND_TYP d1, IND_TYP d2)
 {
     assert(m);
     assert(d1 > 0);
@@ -50,20 +50,20 @@ mat_t *mat_construct(mat_t *m, IND_TYP d1, IND_TYP d2)
     return m;
 }
 
-mat_t *mat_construct_prealloc(mat_t *m, payload_t *pyl, IND_TYP offset, IND_TYP d1, IND_TYP d2)
+mat *mat_construct_prealloc(mat *m, payload *pyl, IND_TYP offset, IND_TYP d1, IND_TYP d2)
 {
     assert(m);
     assert(payload_is_valid(pyl));
     assert(d1 > 0);
     assert(d2 > 0);
     assert(offset >= 0);
-    assert(offset + d1*d2 <= pyl->size);
+    assert((size_t)(offset + d1*d2) <= pyl->size);
 
     if (!m)
         return NULL;
 
     m->size = d1 * d2;
-    if (d1 <= 0 || d2 <= 0 || offset < 0 || (offset + m->size) > pyl->size)
+    if (d1 <= 0 || d2 <= 0 || offset < 0 || (size_t)(offset + m->size) > pyl->size)
     {
         *m = mat_NULL;
         return m;
@@ -76,21 +76,21 @@ mat_t *mat_construct_prealloc(mat_t *m, payload_t *pyl, IND_TYP offset, IND_TYP 
     return m;
 }
 
-mat_t *mat_reform(mat_t *m, IND_TYP offset, IND_TYP d1, IND_TYP d2)
+mat *mat_reform(mat *m, IND_TYP offset, IND_TYP d1, IND_TYP d2)
 {
     assert(mat_is_valid(m));
     assert(d1 > 0);
     assert(d2 > 0);
     assert(offset >= 0);
     m->size = d1 * d2;
-    assert((offset + m->size) <= m->pyl->size);
+    assert((size_t)(offset + m->size) <= m->pyl->size);
     m->d1 = d1;
     m->d2 = d2;
     m->offset = offset;    
     return m;
 }
 
-mat_t *mat_view(mat_t *m, const mat_t *src, IND_TYP offset, IND_TYP d1, IND_TYP d2)
+mat *mat_view(mat *m, const mat *src, IND_TYP offset, IND_TYP d1, IND_TYP d2)
 {
     assert(mat_is_valid(m));
     assert(mat_is_valid(src));
@@ -103,7 +103,7 @@ mat_t *mat_view(mat_t *m, const mat_t *src, IND_TYP offset, IND_TYP d1, IND_TYP 
     m->size = d1 * d2;
     m->offset = src->offset + offset;
 
-    if (d1 <= 0 || d2 <= 0 || offset < 0 || m->offset + m->size > src->pyl->size)
+    if (d1 <= 0 || d2 <= 0 || offset < 0 || (size_t)(m->offset + m->size) > src->pyl->size)
     {
         *m = mat_NULL;
         return m;
@@ -116,15 +116,15 @@ mat_t *mat_view(mat_t *m, const mat_t *src, IND_TYP offset, IND_TYP d1, IND_TYP 
     return m;
 }
 
-mat_t *mat_view_new(const mat_t *src, IND_TYP offset, IND_TYP d1, IND_TYP d2)
+mat *mat_view_new(const mat *src, IND_TYP offset, IND_TYP d1, IND_TYP d2)
 {
-    mat_t *new_m = (mat_t *)malloc(sizeof(mat_t));
+    mat *new_m = (mat *)malloc(sizeof(mat));
     assert(new_m);
     *new_m = mat_NULL;
     return mat_view(new_m, src, offset, d1, d2);
 }
 
-void mat_destruct(mat_t *m)
+void mat_destruct(mat *m)
 {
     if (m)
     {
@@ -133,7 +133,7 @@ void mat_destruct(mat_t *m)
     }
 }
 
-mat_t *mat_new(IND_TYP d1, IND_TYP d2)
+mat *mat_new(IND_TYP d1, IND_TYP d2)
 {
     assert(d1 > 0);
     assert(d2 > 0);
@@ -141,7 +141,7 @@ mat_t *mat_new(IND_TYP d1, IND_TYP d2)
     if (d1 <= 0 || d2 <= 0)
         return NULL;
 
-    mat_t *new_m = (mat_t *)malloc(sizeof(mat_t));
+    mat *new_m = (mat *)malloc(sizeof(mat));
     assert(new_m);
     if (!new_m)
         return NULL;
@@ -149,7 +149,7 @@ mat_t *mat_new(IND_TYP d1, IND_TYP d2)
     return mat_construct(new_m, d1, d2);
 }
 
-void mat_del(mat_t *m)
+void mat_del(mat *m)
 {
     assert(mat_is_valid(m));
     if (m)
@@ -159,7 +159,7 @@ void mat_del(mat_t *m)
     }
 }
 
-mat_t *mat_assign(mat_t *m_dst, const mat_t *m_src)
+mat *mat_assign(mat *m_dst, const mat *m_src)
 {
     assert(mat_is_valid(m_dst));
     assert(mat_is_valid(m_src));
@@ -173,7 +173,7 @@ mat_t *mat_assign(mat_t *m_dst, const mat_t *m_src)
     return m_dst;
 }
 
-mat_t *mat_fill_zero(mat_t *m)
+mat *mat_fill_zero(mat *m)
 {
     assert(mat_is_valid(m));
 
@@ -182,7 +182,7 @@ mat_t *mat_fill_zero(mat_t *m)
     return m;
 }
 
-mat_t *mat_fill_rnd(mat_t *m, FLT_TYP (*rnd)(void))
+mat *mat_fill_rnd(mat *m, FLT_TYP (*rnd)(void))
 {
     assert(mat_is_valid(m));
     assert(rnd);
@@ -193,7 +193,7 @@ mat_t *mat_fill_rnd(mat_t *m, FLT_TYP (*rnd)(void))
     return m;
 }
 
-mat_t *mat_fill_gen(mat_t *m, FLT_TYP (*gen)(const void *param), const void *param)
+mat *mat_fill_gen(mat *m, FLT_TYP (*gen)(const void *param), const void *param)
 {
     assert(mat_is_valid(m));
     assert(gen);
@@ -204,7 +204,7 @@ mat_t *mat_fill_gen(mat_t *m, FLT_TYP (*gen)(const void *param), const void *par
     return m;
 }
 
-char *mat_to_str(const mat_t *m, char *m_str)
+char *mat_to_str(const mat *m, char *m_str)
 {
     assert(m);
     if(mat_is_null(m))
@@ -230,7 +230,7 @@ char *mat_to_str(const mat_t *m, char *m_str)
     return m_str;
 }
 
-mat_t *mat_update(mat_t *m_trg, FLT_TYP alpha, const mat_t *m_right)
+mat *mat_update(mat *m_trg, FLT_TYP alpha, const mat *m_right)
 {
     assert(mat_is_valid(m_trg));
     assert(mat_is_valid(m_right));
@@ -244,7 +244,7 @@ mat_t *mat_update(mat_t *m_trg, FLT_TYP alpha, const mat_t *m_right)
     return m_trg;
 }
 
-FLT_TYP *mat_at(const mat_t *m, IND_TYP i, IND_TYP j)
+FLT_TYP *mat_at(const mat *m, IND_TYP i, IND_TYP j)
 {
     assert(mat_is_valid(m));
 
@@ -259,7 +259,7 @@ FLT_TYP *mat_at(const mat_t *m, IND_TYP i, IND_TYP j)
 
 #define MIN(x, y) (((x) <= (y)) ? (x) : (y))
 
-IND_TYP mat_insert(mat_t *trg, const mat_t *src, IND_TYP row_i)
+IND_TYP mat_insert(mat *trg, const mat *src, IND_TYP row_i)
 {
     assert(mat_is_valid(trg));
     assert(mat_is_valid(src));
@@ -277,13 +277,13 @@ IND_TYP mat_insert(mat_t *trg, const mat_t *src, IND_TYP row_i)
     return nbr_rows_replaced;
 }
 
-size_t mat_serial_size(const mat_t *m)
+size_t mat_serial_size(const mat *m)
 {
     assert(mat_is_valid(m));
     return sizeof(size_t) + sizeof(m->d1) + sizeof(m->d2) + m->size * sizeof(FLT_TYP);
 }
 
-uint8_t *mat_serialize(const mat_t *m, uint8_t *byte_arr)
+uint8_t *mat_serialize(const mat *m, uint8_t *byte_arr)
 {
     assert(mat_is_valid(m));
     assert(byte_arr);
@@ -305,7 +305,7 @@ uint8_t *mat_serialize(const mat_t *m, uint8_t *byte_arr)
     return byte_arr;
 }
 
-const uint8_t *mat_deserialize(mat_t *m, const uint8_t *byte_arr)
+const uint8_t *mat_deserialize(mat *m, const uint8_t *byte_arr)
 {
     assert(mat_is_valid(m));
     assert(byte_arr);
@@ -326,7 +326,7 @@ const uint8_t *mat_deserialize(mat_t *m, const uint8_t *byte_arr)
     return byte_arr;
 }
 
-mat_t *mat_mul(mat_t *result, const mat_t *m_left, const mat_t *m_right)
+mat *mat_mul(mat *result, const mat *m_left, const mat *m_right)
 {
     assert(mat_is_valid(result));
     assert(mat_is_valid(m_left));
@@ -344,7 +344,7 @@ mat_t *mat_mul(mat_t *result, const mat_t *m_left, const mat_t *m_right)
     return result;
 }
 
-mat_t *mat_div(mat_t *result, const mat_t *m_left, const mat_t *m_right)
+mat *mat_div(mat *result, const mat *m_left, const mat *m_right)
 {
     assert(mat_is_valid(result));
     assert(mat_is_valid(m_left));
@@ -362,7 +362,7 @@ mat_t *mat_div(mat_t *result, const mat_t *m_left, const mat_t *m_right)
     return result;
 }
 
-mat_t *mat_mulby(mat_t *m_target, const mat_t *m_right)
+mat *mat_mulby(mat *m_target, const mat *m_right)
 {
     assert(mat_is_valid(m_target));
     assert(mat_is_valid(m_right));
@@ -372,7 +372,7 @@ mat_t *mat_mulby(mat_t *m_target, const mat_t *m_right)
     return mat_mul(m_target, m_target, m_right);
 }
 
-mat_t *mat_dot(mat_t *result, const mat_t *m_left, const mat_t *m_right)
+mat *mat_dot(mat *result, const mat *m_left, const mat *m_right)
 {
     assert(mat_is_valid(result));
     assert(mat_is_valid(m_left));
@@ -389,14 +389,14 @@ mat_t *mat_dot(mat_t *result, const mat_t *m_left, const mat_t *m_right)
     return result;
 }
 
-FLT_TYP mat_norm_2(const mat_t *m)
+FLT_TYP mat_norm_2(const mat *m)
 {
     assert(mat_is_valid(m));
 
     return NRM2(m->size, m->pyl->arr + m->offset, 1);
 }
 
-FLT_TYP mat_sum(const mat_t *m)
+FLT_TYP mat_sum(const mat *m)
 {
     assert(mat_is_valid(m));
 
@@ -404,7 +404,7 @@ FLT_TYP mat_sum(const mat_t *m)
     return DOT(m->size, m->pyl->arr + m->offset, 1, &one, 0);
 }
 
-mat_t *mat_add(mat_t *result, const mat_t *m_left, const mat_t *m_right)
+mat *mat_add(mat *result, const mat *m_left, const mat *m_right)
 {
     assert(mat_is_valid(result));
     assert(mat_is_valid(m_left));
@@ -422,7 +422,7 @@ mat_t *mat_add(mat_t *result, const mat_t *m_left, const mat_t *m_right)
     return result;
 }
 
-mat_t *mat_sub(mat_t *result, const mat_t *m_left, const mat_t *m_right)
+mat *mat_sub(mat *result, const mat *m_left, const mat *m_right)
 {
     assert(mat_is_valid(result));
     assert(mat_is_valid(m_left));
@@ -440,7 +440,7 @@ mat_t *mat_sub(mat_t *result, const mat_t *m_left, const mat_t *m_right)
     return result;
 }
 
-mat_t *mat_addto(mat_t *m_target, const mat_t *m_right)
+mat *mat_addto(mat *m_target, const mat *m_right)
 {
     assert(mat_is_valid(m_target));
     assert(mat_is_valid(m_right));
@@ -450,7 +450,7 @@ mat_t *mat_addto(mat_t *m_target, const mat_t *m_right)
     return mat_add(m_target, m_target, m_right);
 }
 
-mat_t *mat_f_addto(mat_t *m, FLT_TYP f)
+mat *mat_f_addto(mat *m, FLT_TYP f)
 {
     assert(mat_is_valid(m));
 
@@ -458,7 +458,7 @@ mat_t *mat_f_addto(mat_t *m, FLT_TYP f)
     return m;
 }
 
-mat_t *mat_subfrom(mat_t *m_target, const mat_t *m_right)
+mat *mat_subfrom(mat *m_target, const mat *m_right)
 {
     assert(mat_is_valid(m_target));
     assert(mat_is_valid(m_right));
@@ -468,7 +468,7 @@ mat_t *mat_subfrom(mat_t *m_target, const mat_t *m_right)
     return mat_sub(m_target, m_target, m_right);
 }
 
-mat_t *mat_scale(mat_t *m, FLT_TYP scale)
+mat *mat_scale(mat *m, FLT_TYP scale)
 {
     assert(mat_is_valid(m));
 
@@ -477,7 +477,7 @@ mat_t *mat_scale(mat_t *m, FLT_TYP scale)
     return m;
 }
 
-mat_t *mat_square(mat_t *result, const mat_t *m)
+mat *mat_square(mat *result, const mat *m)
 {
     assert(mat_is_valid(result));
     assert(mat_is_valid(m));
@@ -489,7 +489,7 @@ mat_t *mat_square(mat_t *result, const mat_t *m)
     return result;
 }
 
-mat_t *mat_sqrt(mat_t *result, const mat_t *m)
+mat *mat_sqrt(mat *result, const mat *m)
 {
     assert(mat_is_valid(result));
     assert(mat_is_valid(m));
@@ -501,7 +501,7 @@ mat_t *mat_sqrt(mat_t *result, const mat_t *m)
     return result;
 }
 
-mat_t *mat_transpose(mat_t *result, const mat_t *target)
+mat *mat_transpose(mat *result, const mat *target)
 {
     assert(mat_is_valid(result));
     assert(mat_is_valid(target));
@@ -515,7 +515,7 @@ mat_t *mat_transpose(mat_t *result, const mat_t *target)
     return result;
 }
 
-mat_t *mat_T(mat_t *m)
+mat *mat_T(mat *m)
 {
     assert(mat_is_valid(m));
 
@@ -527,7 +527,7 @@ mat_t *mat_T(mat_t *m)
     return m;
 }
 
-bool mat_is_close(const mat_t *m_1, const mat_t *m_2, FLT_TYP eps)
+bool mat_is_close(const mat *m_1, const mat *m_2, FLT_TYP eps)
 {
     assert(mat_is_valid(m_1));
     assert(mat_is_valid(m_2));
@@ -541,7 +541,7 @@ bool mat_is_close(const mat_t *m_1, const mat_t *m_2, FLT_TYP eps)
     nrm_ratio += mat_norm_2(m_2);
     if (nrm_ratio == 0)
         return true;
-    mat_t result = mat_NULL;
+    mat result = mat_NULL;
     mat_construct(&result, m_1->d1, m_1->d2);
     mat_sub(&result, m_1, m_2);
     nrm_ratio = 2 * mat_norm_2(&result) / nrm_ratio;

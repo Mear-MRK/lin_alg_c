@@ -5,12 +5,8 @@
 #include <time.h>
 #include <assert.h>
 
-static FLT_TYP rnd(void)
-{
-    return 2 * rand() / (FLT_TYP)RAND_MAX - 1;
-}
 
-static inline FLT_TYP *arr_lin_fill(FLT_TYP *arr, FLT_TYP start, FLT_TYP end, IND_TYP sz)
+static FLT_TYP *arr_lin_fill(FLT_TYP *arr, FLT_TYP start, FLT_TYP end, IND_TYP sz)
 {
     if (!arr || sz == 0)
         return arr;
@@ -29,16 +25,16 @@ static inline FLT_TYP *arr_lin_fill(FLT_TYP *arr, FLT_TYP start, FLT_TYP end, IN
 void mat_transposition_test(void)
 {
     FLT_TYP arr[6] = {11, 12, 13, 21, 22, 23};
-    payload_t pyl = payload_NULL;
+    payload pyl = payload_NULL;
     payload_prealloc(&pyl, arr, 6);
     // assert(payload_is_valid(&pyl));
-    mat_t m = mat_NULL;
+    mat m = mat_NULL;
     mat_construct_prealloc(&m, &pyl, 0, 2, 3);
     printf("m: d1:%ld d2:%ld off:%ld sz:%ld pyl:%p pyl_sz:%ld\n", m.d1, m.d2, m.offset, m.size,
            m.pyl, m.pyl->size);
     // assert(mat_is_valid(&m));
 
-    mat_t *r = mat_new(3, 2);
+    mat *r = mat_new(3, 2);
     char str_bf[1024] = {0};
     printf("m:\n%s\n", mat_to_str(&m, str_bf));
     printf("r=m^T:\n%s\n", mat_to_str(mat_transpose(r, &m), str_bf));
@@ -54,11 +50,11 @@ void mat_arith_test(void)
 {
     char str_bf[4096];
 
-    mat_t *a = mat_new(3, 3);
+    mat *a = mat_new(3, 3);
     arr_lin_fill(a->pyl->arr, 1, 9, 9);
-    mat_t *b = mat_new(3, 3);
+    mat *b = mat_new(3, 3);
     arr_lin_fill(b->pyl->arr, -4, 4, 9);
-    mat_t *r = mat_new(3, 3);
+    mat *r = mat_new(3, 3);
 
     printf("a:\n%s\n", mat_to_str(a, str_bf));
     printf("b:\n%s\n", mat_to_str(b, str_bf));
@@ -84,12 +80,12 @@ void mat_dot_test(void)
     char str_bf[4096];
     srand(time(NULL));
 
-    mat_t *a = mat_new(2, 3);
+    mat *a = mat_new(2, 3);
     arr_lin_fill(a->pyl->arr, 1, 6, 6);
-    mat_t *b = mat_new(3, 2);
+    mat *b = mat_new(3, 2);
     arr_lin_fill(b->pyl->arr, -2, 3, 6);
-    mat_t *r1 = mat_new(3, 3);
-    mat_t *r2 = mat_new(2, 2);
+    mat *r1 = mat_new(3, 3);
+    mat *r2 = mat_new(2, 2);
 
     printf("a:\n%s\n", mat_to_str(a, str_bf));
     printf("b:\n%s\n", mat_to_str(b, str_bf));

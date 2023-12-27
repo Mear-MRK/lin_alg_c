@@ -4,7 +4,7 @@
 
 #include "blaseng.h"
 
-vec_t *mat_dot_vec(vec_t *target, const mat_t *ml, const vec_t *vr)
+vec *mat_dot_vec(vec *target, const mat *ml, const vec *vr)
 {
     assert(vec_is_valid(target));
     assert(mat_is_valid(ml));
@@ -21,7 +21,7 @@ vec_t *mat_dot_vec(vec_t *target, const mat_t *ml, const vec_t *vr)
     return target;
 }
 
-vec_t *vec_dot_mat(vec_t *target, const vec_t *vl, const mat_t *mr)
+vec *vec_dot_mat(vec *target, const vec *vl, const mat *mr)
 {
     assert(vec_is_valid(target));
     assert(mat_is_valid(mr));
@@ -38,7 +38,7 @@ vec_t *vec_dot_mat(vec_t *target, const vec_t *vl, const mat_t *mr)
     return target;
 }
 
-mat_t *vec_outer(mat_t *target, const vec_t *v_left, const vec_t *v_right)
+mat *vec_outer(mat *target, const vec *v_left, const vec *v_right)
 {
     assert(mat_is_valid(target));
     assert(vec_is_valid(v_left));
@@ -54,7 +54,7 @@ mat_t *vec_outer(mat_t *target, const vec_t *v_left, const vec_t *v_right)
     return target;
 }
 
-mat_t *mat_update_outer(mat_t *target, FLT_TYP alpha, const vec_t *v_left, const vec_t *v_right)
+mat *mat_update_outer(mat *target, FLT_TYP alpha, const vec *v_left, const vec *v_right)
 {
     assert(mat_is_valid(target));
     assert(vec_is_valid(v_left));
@@ -69,7 +69,7 @@ mat_t *mat_update_outer(mat_t *target, FLT_TYP alpha, const vec_t *v_left, const
     return target;
 }
 
-vec_t *mat_row_at(mat_t *m, vec_t *row, IND_TYP i)
+vec *mat_row_at(mat *m, vec *row, IND_TYP i)
 {
     assert(mat_is_valid(m));
     assert(row);
@@ -84,7 +84,7 @@ vec_t *mat_row_at(mat_t *m, vec_t *row, IND_TYP i)
     return row;
 }
 
-vec_t *mat_column_at(mat_t *m, vec_t *col, IND_TYP j)
+vec *mat_column_at(mat *m, vec *col, IND_TYP j)
 {
     assert(mat_is_valid(m));
     assert(col);

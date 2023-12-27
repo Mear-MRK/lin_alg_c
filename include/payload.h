@@ -5,9 +5,8 @@
 
 #include "lin_alg_config.h"
 
-
 /**
- * payload_t - Payload structure.
+ * payload - Payload structure.
  *
  * This structure represents a payload, which contains:
  * - size: The number of elements in the payload.
@@ -15,13 +14,13 @@
  * - ref_count: A reference count for shared payloads.
  * - flags: Flags indicating properties of the payload.
  */
-typedef struct payload_struct
+typedef struct payload
 {
-    size_t size;
     FLT_TYP *arr;
+    size_t size;
     int ref_count;
-    unsigned flags;
-} payload_t;
+    uint32_t flags;
+} payload;
 
 #define payload_FLG_NEW 1u
 #define payload_FLG_PREALLOC 2u
@@ -35,7 +34,7 @@ typedef struct payload_struct
  * initialize payloads or compare against null payloads. It has a
  * size of 0, null pointer for the array, ref count of 0, and no flags set.
  */
-#define payload_NULL ((const payload_t){.size = 0, .arr = NULL, .ref_count = 0, .flags = 0u})
+#define payload_NULL ((const payload){.size = 0, .arr = NULL, .ref_count = 0, .flags = 0u})
 
 /**
  * Checks if the given payload is valid.
@@ -46,7 +45,13 @@ typedef struct payload_struct
  * @param pyl Pointer to the payload to check.
  * @return true if the payload is valid, false otherwise.
  */
-bool payload_is_valid(const payload_t *pyl);
+static inline bool payload_is_valid(const payload *pyl)
+{
+    return pyl &&
+           pyl->size > 0 &&
+           pyl->arr &&
+           pyl->ref_count >= 0;
+}
 
 /**
  * Constructs a new payload.
@@ -58,7 +63,7 @@ bool payload_is_valid(const payload_t *pyl);
  * @param size The number of elements to allocate space for in the payload.
  * @return A pointer to the constructed payload.
  */
-payload_t *payload_construct(payload_t *pyl, size_t size);
+payload *payload_construct(payload *pyl, size_t size);
 
 /**
  * Allocates a new payload object with the given size array.
@@ -70,13 +75,10 @@ payload_t *payload_construct(payload_t *pyl, size_t size);
  * @param size The number of elements to allocate space for in the new payload.
  * @return A pointer to the newly constructed payload.
  */
-payload_t *payload_new(size_t size);
+payload *payload_new(size_t size);
 
-// void payload_destruct(payload_t *pyl);
 
-// void payload_del(payload_t *pyl);
-
-payload_t *payload_prealloc(payload_t *pyl, FLT_TYP *arr, size_t size);
+payload *payload_prealloc(payload *pyl, FLT_TYP *arr, size_t size);
 
 /**
  * Increases the reference count of the given payload by 1.
@@ -87,7 +89,7 @@ payload_t *payload_prealloc(payload_t *pyl, FLT_TYP *arr, size_t size);
  * @param pyl Pointer to the payload object.
  * @return The same payload pointer pyl.
  */
-payload_t *payload_share(payload_t *pyl);
+payload *payload_share(payload *pyl);
 
 /**
  * Decrements the reference count of the given payload.
@@ -95,7 +97,7 @@ payload_t *payload_share(payload_t *pyl);
  *
  * @param pyl Pointer to the payload object.
  */
-void payload_release(payload_t *pyl);
+void payload_release(payload *pyl);
 
 /**
  * Resizes the given payload to the new size.
@@ -106,7 +108,7 @@ void payload_release(payload_t *pyl);
  * @param new_size The new size to resize the payload to.
  * @return A pointer to the resized payload.
  */
-payload_t *payload_resize(payload_t *pyl, size_t new_size);
+payload *payload_resize(payload *pyl, size_t new_size);
 
 /**
  * Copies a region of the source payload into the destination payload.
@@ -121,4 +123,4 @@ payload_t *payload_resize(payload_t *pyl, size_t new_size);
  * @param cp_size Number of elements to copy
  * @return Number of elements copied
  */
-size_t payload_copy(payload_t *dest, size_t dest_off, const payload_t *src, size_t src_off, size_t cp_size);
+size_t payload_copy(payload *dest, size_t dest_off, const payload *src, size_t src_off, size_t cp_size);

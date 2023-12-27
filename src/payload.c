@@ -8,15 +8,7 @@
 
 #define MIN(x, y) ((x) <= (y) ? (x) : (y))
 
-bool payload_is_valid(const payload_t *pyl)
-{
-    return pyl &&
-           pyl->size > 0 &&
-           pyl->arr &&
-           pyl->ref_count >= 0;
-}
-
-payload_t *payload_construct(payload_t *pyl, size_t size)
+payload *payload_construct(payload *pyl, size_t size)
 {
     assert(pyl);
     assert(size > 0);
@@ -44,7 +36,7 @@ payload_t *payload_construct(payload_t *pyl, size_t size)
     return pyl;
 }
 
-static void payload_destruct(payload_t *pyl)
+static void payload_destruct(payload *pyl)
 {
     assert(payload_is_valid(pyl));
 
@@ -55,16 +47,16 @@ static void payload_destruct(payload_t *pyl)
     *pyl = payload_NULL;
 }
 
-payload_t *payload_new(size_t size)
+payload *payload_new(size_t size)
 {
-    payload_t *pyl = (payload_t *)calloc(1, sizeof(payload_t));
+    payload *pyl = (payload *)calloc(1, sizeof(payload ));
     assert(pyl);
     payload_construct(pyl, size);
     pyl->flags |= payload_FLG_NEW;
     return pyl;
 }
 
-static void payload_del(payload_t *pyl)
+static void payload_del(payload *pyl)
 {
     if (!pyl || !(pyl->flags & payload_FLG_NEW))
         return;
@@ -72,7 +64,7 @@ static void payload_del(payload_t *pyl)
     free((void *)pyl);
 }
 
-payload_t *payload_prealloc(payload_t *pyl, FLT_TYP *arr, size_t size)
+payload *payload_prealloc(payload *pyl, FLT_TYP *arr, size_t size)
 {
     assert(pyl);
     assert(arr);
@@ -94,7 +86,7 @@ payload_t *payload_prealloc(payload_t *pyl, FLT_TYP *arr, size_t size)
     return pyl;
 }
 
-payload_t *payload_share(payload_t *pyl)
+payload *payload_share(payload *pyl)
 {
     assert(payload_is_valid(pyl));
 
@@ -104,7 +96,7 @@ payload_t *payload_share(payload_t *pyl)
     return pyl;
 }
 
-void payload_release(payload_t *pyl)
+void payload_release(payload *pyl)
 {
     // assert(payload_is_valid(pyl));
     if (!payload_is_valid(pyl))
@@ -126,7 +118,7 @@ void payload_release(payload_t *pyl)
     }
 }
 
-payload_t *payload_resize(payload_t *pyl, size_t new_size)
+payload *payload_resize(payload *pyl, size_t new_size)
 {
     assert(payload_is_valid(pyl));
 
@@ -147,12 +139,15 @@ payload_t *payload_resize(payload_t *pyl, size_t new_size)
     return pyl;
 }
 
-size_t payload_copy(payload_t *dest, size_t dest_off, const payload_t *src, size_t src_off, size_t cp_size)
+size_t payload_copy(payload *dest, size_t dest_off, const payload *src, size_t src_off, size_t cp_size)
 {
     assert(payload_is_valid(dest));
     assert(payload_is_valid(src));
     assert(src_off < src->size);
     assert(dest_off < dest->size);
+
+    if(dest->arr == src->arr)
+        return 0;
 
     if (cp_size == 0)
         cp_size = src->size - src_off;

@@ -27,7 +27,7 @@ static inline FLT_TYP* arr_lin_fill(FLT_TYP* arr, FLT_TYP start, FLT_TYP end, IN
     return arr;
 }
 
-static vec_t *vec_sigmoid_alt(vec_t *result, const vec_t *v)
+static vec *vec_sigmoid_alt(vec *result, const vec *v)
 {
     vec_tanh(result, vec_sclmul(result, v, (FLT_TYP)0.5));
     vec_f_addto(result, 1);
@@ -37,9 +37,9 @@ static vec_t *vec_sigmoid_alt(vec_t *result, const vec_t *v)
 
 static void sigmoid_test(void)
 {
-    vec_t v = vec_NULL;
-    vec_t sv = vec_NULL;
-    vec_t sv2 = vec_NULL;
+    vec v = vec_NULL;
+    vec sv = vec_NULL;
+    vec sv2 = vec_NULL;
     const int sz = 64;
     vec_construct(&v, sz);
     vec_construct(&sv, sz);
@@ -67,7 +67,7 @@ static void sigmoid_test(void)
         
         if(! vec_is_close(&sv, &sv2, 1E-6) )
         {
-            vec_t* df = vec_new(sz);
+            vec* df = vec_new(sz);
             char str_buff[4096] = {0};
             printf("diff: %s\n", vec_to_str(vec_sub(df, &sv, &sv2), str_buff));
             vec_del(df);
@@ -84,8 +84,8 @@ static void sigmoid_test(void)
 void relu_test(void)
 {
     const int sz = 7;
-    vec_t* v = vec_new(sz);
-    vec_t* r = vec_new(sz);
+    vec* v = vec_new(sz);
+    vec* r = vec_new(sz);
     
     arr_lin_fill(v->pyl->arr, -3, 3, 7);
     
@@ -103,8 +103,8 @@ void relu_test(void)
 
 void fill_vec_test(void)
 {
-    vec_t v1 = vec_NULL;
-    vec_t v2 = vec_NULL;
+    vec v1 = vec_NULL;
+    vec v2 = vec_NULL;
     const unsigned sz = 677;
     vec_construct(&v1, sz);
     vec_construct(&v2, sz);
@@ -135,15 +135,15 @@ void vec_test(void)
     puts("+++ vec_test +++");
     char str_buff[4096] = {0};
 
-    vec_t va = vec_NULL;
-    vec_t vb = vec_NULL;
-    vec_t* vr = vec_new(3);
+    vec va = vec_NULL;
+    vec vb = vec_NULL;
+    vec* vr = vec_new(3);
 
 
     vec_construct(&va, 3);
     vec_copy_arr(&va, (FLT_TYP[]){1, 2, 3});
     // vec_construct(&vb, 3);
-    payload_t pyl_b;
+    payload pyl_b;
     payload_prealloc(&pyl_b, (FLT_TYP[]){-10, -1, -10, 1, -10, 2, -10}, 7);
     vec_construct_prealloc(&vb, &pyl_b, 1, 3, 2);
 
@@ -171,7 +171,7 @@ void vec_test(void)
     vec_sclmul(&va, &vb, 3.14f);
     printf("va=vb*3.14: %s\n", vec_to_str(&va, str_buff));
     
-    vec_t* vw = vec_new_view(&vb, 0, vb.d, 2);
+    vec* vw = vec_new_view(&vb, 0, vb.d, 2);
     printf("vw=view(vb): %s\n", vec_to_str(vw, str_buff));
     vec_fill(vw, 111);
     printf("vw=111; vb: %s\n", vec_to_str(&vb, str_buff)); 

@@ -7,18 +7,18 @@ void vec_mat_test(void)
 {
     puts("+++ vec_mat_test +++");
 
-    mat_t m = mat_NULL;
-    vec_t vr = vec_NULL;
-    vec_t vl = vec_NULL;
-    vec_t res_2 = vec_NULL;
-    vec_t res_3 = vec_NULL;
+    mat m = mat_NULL;
+    vec vr = vec_NULL;
+    vec vl = vec_NULL;
+    vec res_2 = vec_NULL;
+    vec res_3 = vec_NULL;
 
     mat_construct(&m, 2, 3);
 
     FLT_TYP vr_arr[] = {-10 , 1, -10, -1, -10, 2, -10};
-    payload_t pyl_r;
+    payload pyl_r;
     FLT_TYP vl_arr[] = {-1, 10, 2};
-    payload_t pyl_l;
+    payload pyl_l;
 
     payload_prealloc(&pyl_r, vr_arr, 7);
     vec_construct_prealloc(&vr, &pyl_r, 1, 3, 2);
@@ -40,8 +40,8 @@ void vec_mat_test(void)
 
     char buff[6*32+8];
 
-    vec_t row = vec_NULL;
-    vec_t col = vec_NULL;
+    vec row = vec_NULL;
+    vec col = vec_NULL;
 
     printf("m:\n%s\n", mat_to_str(&m, buff));
     printf("m row 1:\n%s\n", vec_to_str(mat_row_at(&m, &row, 1), buff));
@@ -54,7 +54,7 @@ void vec_mat_test(void)
     printf("res vl@m:\n%s\n", vec_to_str(&res_3, buff));
 
 
-    mat_t m2 = mat_NULL;
+    mat m2 = mat_NULL;
     mat_construct(&m2, 2, 3);
     mat_fill_zero(&m2);
     vec_outer(&m2, &vl, &vr);
