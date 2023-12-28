@@ -2,6 +2,7 @@
 
 #include <stdlib.h>
 #include <stdbool.h>
+#include <assert.h>
 
 #include "lin_alg_config.h"
 
@@ -124,3 +125,12 @@ payload *payload_resize(payload *pyl, size_t new_size);
  * @return Number of elements copied
  */
 size_t payload_copy(payload *dest, size_t dest_off, const payload *src, size_t src_off, size_t cp_size);
+
+
+size_t payload_clear_value(payload *trg, size_t offset, size_t end);
+
+static inline FLT_TYP *payload_at(payload *pyl, IND_TYP i)
+{
+    assert(i >= 0 && (size_t)i < pyl->size);
+    return pyl->arr + i;
+}

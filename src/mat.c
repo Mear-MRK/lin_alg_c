@@ -9,8 +9,7 @@
 bool mat_is_null(const mat *m)
 {
     assert(m);
-    if (!m)
-        return false;
+
     return memcmp(m, &mat_NULL, sizeof(mat)) == 0;
 }
 
@@ -57,7 +56,7 @@ mat *mat_construct_prealloc(mat *m, payload *pyl, IND_TYP offset, IND_TYP d1, IN
     assert(d1 > 0);
     assert(d2 > 0);
     assert(offset >= 0);
-    assert((size_t)(offset + d1*d2) <= pyl->size);
+    assert((size_t)(offset + d1 * d2) <= pyl->size);
 
     if (!m)
         return NULL;
@@ -86,7 +85,7 @@ mat *mat_reform(mat *m, IND_TYP offset, IND_TYP d1, IND_TYP d2)
     assert((size_t)(offset + m->size) <= m->pyl->size);
     m->d1 = d1;
     m->d2 = d2;
-    m->offset = offset;    
+    m->offset = offset;
     return m;
 }
 
@@ -166,9 +165,15 @@ mat *mat_assign(mat *m_dst, const mat *m_src)
     assert(m_dst->d1 == m_src->d1);
     assert(m_dst->d2 == m_src->d2);
 
-    memcpy(m_dst->pyl->arr + m_dst->offset,
-           m_src->pyl->arr + m_src->offset,
-           m_dst->size * sizeof(FLT_TYP));
+    FLT_TYP *arr_dst = payload_at(m_dst->pyl, m_dst->offset);
+    FLT_TYP *arr_src = payload_at(m_src->pyl, m_src->offset);
+
+    if (arr_dst == arr_src)
+        return m_dst;
+
+    memcpy(arr_dst, arr_src, m_dst->size * sizeof(FLT_TYP));
+
+    // payload_copy(m_dst->pyl, m_dst->offset, m_src->pyl, m_src->offset, m_dst->size);
 
     return m_dst;
 }
@@ -177,7 +182,7 @@ mat *mat_fill_zero(mat *m)
 {
     assert(mat_is_valid(m));
 
-    memset(m->pyl->arr + m->offset, 0, m->size * sizeof(FLT_TYP));
+    memset(payload_at(m->pyl, m->offset), 0, m->size * sizeof(FLT_TYP));
 
     return m;
 }
@@ -187,8 +192,8 @@ mat *mat_fill_rnd(mat *m, FLT_TYP (*rnd)(void))
     assert(mat_is_valid(m));
     assert(rnd);
 
-    for (IND_TYP i = 0; i < m->size; i++)
-        m->pyl->arr[m->offset + i] = rnd();
+    for (IND_TYP i = m->offset; i < m->offset + m->size; i++)
+        *payload_at(m->pyl, i) = rnd();
 
     return m;
 }
@@ -198,8 +203,8 @@ mat *mat_fill_gen(mat *m, FLT_TYP (*gen)(const void *param), const void *param)
     assert(mat_is_valid(m));
     assert(gen);
 
-    for (IND_TYP i = 0; i < m->size; i++)
-        m->pyl->arr[m->offset + i] = gen(param);
+    for (IND_TYP i = m->offset; i < m->offset + m->size; i++)
+        *payload_at(m->pyl, i) = gen(param);
 
     return m;
 }
@@ -207,9 +212,9 @@ mat *mat_fill_gen(mat *m, FLT_TYP (*gen)(const void *param), const void *param)
 char *mat_to_str(const mat *m, char *m_str)
 {
     assert(m);
-    if(mat_is_null(m))
+    if (mat_is_null(m))
     {
-        strcpy(m_str,"mat_NULL\n");
+        strcpy(m_str, "mat_NULL\n");
         return m_str;
     }
     assert(mat_is_valid(m));
@@ -238,8 +243,8 @@ mat *mat_update(mat *m_trg, FLT_TYP alpha, const mat *m_right)
     assert(m_trg->d2 == m_right->d2);
 
     AXPY(m_trg->size, alpha,
-         m_right->pyl->arr + m_right->offset, 1,
-         m_trg->pyl->arr + m_trg->offset, 1);
+         payload_at(m_right->pyl, m_right->offset), 1,
+         payload_at(m_trg->pyl, m_trg->offset), 1);
 
     return m_trg;
 }
@@ -254,7 +259,7 @@ FLT_TYP *mat_at(const mat *m, IND_TYP i, IND_TYP j)
         j += m->d2;
     assert(i >= 0 && i < m->d1);
     assert(j >= 0 && j < m->d2);
-    return m->pyl->arr + (m->offset + i * m->d2 + j);
+    return payload_at(m->pyl, m->offset + i * m->d2 + j);
 }
 
 #define MIN(x, y) (((x) <= (y)) ? (x) : (y))
@@ -271,8 +276,8 @@ IND_TYP mat_insert(mat *trg, const mat *src, IND_TYP row_i)
     if (row_i >= trg->d1)
         return 0;
     IND_TYP nbr_rows_replaced = MIN(src->d1, trg->d1 - row_i);
-    memcpy(trg->pyl->arr + trg->offset + row_i * trg->d2,
-           src->pyl->arr + src->offset,
+    memcpy(payload_at(trg->pyl, trg->offset + row_i * trg->d2),
+           payload_at(src->pyl, src->offset),
            nbr_rows_replaced * src->d2 * sizeof(FLT_TYP));
     return nbr_rows_replaced;
 }
@@ -300,7 +305,7 @@ uint8_t *mat_serialize(const mat *m, uint8_t *byte_arr)
     memcpy(byte_arr, &m->d2, sz);
     byte_arr += sz;
     sz = m->size * sizeof(FLT_TYP);
-    memcpy(byte_arr, m->pyl->arr + m->offset, sz);
+    memcpy(byte_arr, payload_at(m->pyl, m->offset), sz);
     byte_arr += sz;
     return byte_arr;
 }
@@ -321,7 +326,7 @@ const uint8_t *mat_deserialize(mat *m, const uint8_t *byte_arr)
     byte_arr += sz;
     mat_construct(m, d1, d2);
     sz = m->size * sizeof(FLT_TYP);
-    memcpy(m->pyl->arr, byte_arr, sz);
+    memcpy(payload_at(m->pyl, 0), byte_arr, sz);
     byte_arr += sz;
     return byte_arr;
 }
@@ -337,9 +342,9 @@ mat *mat_mul(mat *result, const mat *m_left, const mat *m_right)
     assert(result->d2 == m_right->d2);
 
     VMUL(m_left->size,
-         m_left->pyl->arr + m_left->offset,
-         m_right->pyl->arr + m_right->offset,
-         result->pyl->arr + result->offset);
+         payload_at(m_left->pyl, m_left->offset),
+         payload_at(m_right->pyl, m_right->offset),
+         payload_at(result->pyl, result->offset));
 
     return result;
 }
@@ -355,9 +360,9 @@ mat *mat_div(mat *result, const mat *m_left, const mat *m_right)
     assert(result->d2 == m_right->d2);
 
     VDIV(m_left->size,
-         m_left->pyl->arr + m_left->offset,
-         m_right->pyl->arr + m_right->offset,
-         result->pyl->arr + result->offset);
+         payload_at(m_left->pyl, m_left->offset),
+         payload_at(m_right->pyl, m_right->offset),
+         payload_at(result->pyl, result->offset));
 
     return result;
 }
@@ -382,9 +387,9 @@ mat *mat_dot(mat *result, const mat *m_left, const mat *m_right)
 
     GEMM(CblasRowMajor, CblasNoTrans, CblasNoTrans,
          m_left->d1, m_right->d2, m_left->d2, 1,
-         m_left->pyl->arr + m_left->offset, m_left->d2,
-         m_right->pyl->arr + m_right->offset, m_right->d2,
-         0, result->pyl->arr + result->offset, result->d2);
+         payload_at(m_left->pyl, m_left->offset), m_left->d2,
+         payload_at(m_right->pyl, m_right->offset), m_right->d2,
+         0, payload_at(result->pyl, result->offset), result->d2);
 
     return result;
 }
@@ -393,7 +398,7 @@ FLT_TYP mat_norm_2(const mat *m)
 {
     assert(mat_is_valid(m));
 
-    return NRM2(m->size, m->pyl->arr + m->offset, 1);
+    return NRM2(m->size, payload_at(m->pyl, m->offset), 1);
 }
 
 FLT_TYP mat_sum(const mat *m)
@@ -401,7 +406,7 @@ FLT_TYP mat_sum(const mat *m)
     assert(mat_is_valid(m));
 
     FLT_TYP one = 1;
-    return DOT(m->size, m->pyl->arr + m->offset, 1, &one, 0);
+    return DOT(m->size, payload_at(m->pyl, m->offset), 1, &one, 0);
 }
 
 mat *mat_add(mat *result, const mat *m_left, const mat *m_right)
@@ -415,9 +420,9 @@ mat *mat_add(mat *result, const mat *m_left, const mat *m_right)
     assert(result->d2 == m_right->d2);
 
     VADD(result->size,
-         m_left->pyl->arr + m_left->offset,
-         m_right->pyl->arr + m_right->offset,
-         result->pyl->arr + result->offset);
+         payload_at(m_left->pyl, m_left->offset),
+         payload_at(m_right->pyl, m_right->offset),
+         payload_at(result->pyl, result->offset));
 
     return result;
 }
@@ -433,9 +438,9 @@ mat *mat_sub(mat *result, const mat *m_left, const mat *m_right)
     assert(result->d2 == m_right->d2);
 
     VSUB(result->size,
-         m_left->pyl->arr + m_left->offset,
-         m_right->pyl->arr + m_right->offset,
-         result->pyl->arr + result->offset);
+         payload_at(m_left->pyl, m_left->offset),
+         payload_at(m_right->pyl, m_right->offset),
+         payload_at(result->pyl, result->offset));
 
     return result;
 }
@@ -454,7 +459,7 @@ mat *mat_f_addto(mat *m, FLT_TYP f)
 {
     assert(mat_is_valid(m));
 
-    AXPY(m->size, 1, &f, 0, m->pyl->arr + m->offset, 1);
+    AXPY(m->size, 1, &f, 0, payload_at(m->pyl, m->offset), 1);
     return m;
 }
 
@@ -472,7 +477,7 @@ mat *mat_scale(mat *m, FLT_TYP scale)
 {
     assert(mat_is_valid(m));
 
-    SCAL(m->size, scale, m->pyl->arr + m->offset, 1);
+    SCAL(m->size, scale, payload_at(m->pyl, m->offset), 1);
 
     return m;
 }
@@ -484,7 +489,7 @@ mat *mat_square(mat *result, const mat *m)
     assert(result->d1 == m->d1);
     assert(result->d2 == m->d2);
 
-    VSQR(m->size, m->pyl->arr + m->offset, result->pyl->arr + result->offset);
+    VSQR(m->size, payload_at(m->pyl, m->offset), payload_at(result->pyl, result->offset));
 
     return result;
 }
@@ -496,7 +501,7 @@ mat *mat_sqrt(mat *result, const mat *m)
     assert(result->d1 == m->d1);
     assert(result->d2 == m->d2);
 
-    VSQRT(m->size, m->pyl->arr + m->offset, result->pyl->arr + result->offset);
+    VSQRT(m->size, payload_at(m->pyl, m->offset), payload_at(result->pyl, result->offset));
 
     return result;
 }
@@ -509,8 +514,8 @@ mat *mat_transpose(mat *result, const mat *target)
     assert(result->d1 == target->d2);
 
     OMAT('R', 'T', target->d1, target->d2, 1,
-         target->pyl->arr + target->offset, target->d2,
-         result->pyl->arr + result->offset, result->d2);
+         payload_at(target->pyl, target->offset), target->d2,
+         payload_at(result->pyl, result->offset), result->d2);
 
     return result;
 }
@@ -519,7 +524,7 @@ mat *mat_T(mat *m)
 {
     assert(mat_is_valid(m));
 
-    IMAT('R', 'T', m->d1, m->d2, 1, m->pyl->arr + m->offset, m->d2, m->d1);
+    IMAT('R', 'T', m->d1, m->d2, 1, payload_at(m->pyl, m->offset), m->d2, m->d1);
     IND_TYP tmp = m->d1;
     m->d1 = m->d2;
     m->d2 = tmp;
@@ -535,7 +540,7 @@ bool mat_is_close(const mat *m_1, const mat *m_2, FLT_TYP eps)
 
     if (m_1->d1 != m_2->d1 || m_1->d2 != m_2->d2)
         return false;
-    if (m_1->pyl->arr + m_1->offset == m_2->pyl->arr + m_2->offset)
+    if (payload_at(m_1->pyl, m_1->offset) == payload_at(m_2->pyl,  m_2->offset))
         return true;
     FLT_TYP nrm_ratio = mat_norm_2(m_1);
     nrm_ratio += mat_norm_2(m_2);

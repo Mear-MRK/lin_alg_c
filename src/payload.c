@@ -30,8 +30,7 @@ payload *payload_construct(payload *pyl, size_t size)
         return pyl;
     }
     pyl->ref_count = 1;
-    pyl->flags = payload_FLG_RESIZABLE;
-    pyl->flags |= payload_FLG_SHRINKABLE;
+    pyl->flags = payload_FLG_RESIZABLE | payload_FLG_SHRINKABLE;
 
     return pyl;
 }
@@ -158,4 +157,19 @@ size_t payload_copy(payload *dest, size_t dest_off, const payload *src, size_t s
     memcpy(dest->arr + dest_off, src->arr + src_off, cp_size * sizeof(FLT_TYP));
 
     return cp_size;
+}
+
+size_t payload_clear_value(payload *trg, size_t offset, size_t end)
+{
+    assert(payload_is_valid(trg));
+    // assert(offset < trg->size);
+    // assert(offset < end);
+
+    if(offset >= trg->size || end <= offset)
+        return 0;
+    end = MIN(end, trg->size);
+    size_t size = (end - offset);
+    memset(trg->arr + offset, 0, size * sizeof(FLT_TYP));
+
+    return size;
 }
