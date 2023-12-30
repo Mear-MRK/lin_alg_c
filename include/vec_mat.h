@@ -15,7 +15,7 @@ vec *vec_dot_mat(vec *result, const vec *v_left, const mat *m_right);
 mat *vec_outer(mat *result, const vec *v_left, const vec *v_right);
 
 // target += alpha * v_left (*) v_right : (*) = outer product
-mat *mat_update_outer(mat *target, FLT_TYP alpha, const vec *v_left, const vec *v_right);
+mat *mat_update_outer(mat *target, FLD_TYP alpha, const vec *v_left, const vec *v_right);
 
 // Give vec corresponing to row i; payload is shared
 vec *mat_row_at(mat *m, vec *row, IND_TYP i);

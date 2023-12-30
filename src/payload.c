@@ -22,7 +22,7 @@ payload *payload_construct(payload *pyl, size_t size)
     }
 
     pyl->size = size;
-    pyl->arr = (FLT_TYP *)aligned_alloc(64, size * sizeof(FLT_TYP));
+    pyl->arr = (FLD_TYP *)aligned_alloc(64, size * sizeof(FLD_TYP));
     assert(pyl->arr);
     if (!pyl->arr)
     {
@@ -63,7 +63,7 @@ static void payload_del(payload *pyl)
     free((void *)pyl);
 }
 
-payload *payload_prealloc(payload *pyl, FLT_TYP *arr, size_t size)
+payload *payload_prealloc(payload *pyl, FLD_TYP *arr, size_t size)
 {
     assert(pyl);
     assert(arr);
@@ -133,7 +133,7 @@ payload *payload_resize(payload *pyl, size_t new_size)
     assert(ptr);
     if (!ptr)
         return NULL;
-    pyl->arr = (FLT_TYP *)ptr;
+    pyl->arr = (FLD_TYP *)ptr;
     pyl->size = new_size;
     return pyl;
 }
@@ -154,7 +154,7 @@ size_t payload_copy(payload *dest, size_t dest_off, const payload *src, size_t s
         cp_size = MIN(cp_size, src->size - src_off);
     cp_size = MIN(cp_size, dest->size - dest_off);
 
-    memcpy(dest->arr + dest_off, src->arr + src_off, cp_size * sizeof(FLT_TYP));
+    memcpy(dest->arr + dest_off, src->arr + src_off, cp_size * sizeof(FLD_TYP));
 
     return cp_size;
 }
@@ -169,7 +169,7 @@ size_t payload_clear_value(payload *trg, size_t offset, size_t end)
         return 0;
     end = MIN(end, trg->size);
     size_t size = (end - offset);
-    memset(trg->arr + offset, 0, size * sizeof(FLT_TYP));
+    memset(trg->arr + offset, 0, size * sizeof(FLD_TYP));
 
     return size;
 }

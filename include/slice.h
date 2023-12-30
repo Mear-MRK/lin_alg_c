@@ -12,9 +12,9 @@ typedef struct slice
     IND_TYP step;  // step size
 } slice;
 
-#define slice_IND_UNDEF MIN_IND
-#define slice_IND_P_INF MAX_IND
-#define slice_IND_M_INF (MIN_IND + 1)
+#define slice_IND_UNDEF IND_MIN
+#define slice_IND_P_INF IND_MAX
+#define slice_IND_M_INF (IND_MIN + 1)
 
 #define slice_NULL ((const slice){.start = slice_IND_UNDEF, .stop = slice_IND_UNDEF, .step = 0, .len = 0})
 

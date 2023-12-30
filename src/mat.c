@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <assert.h>
 
-#include "blaseng.h"
+#include "vector_eng.h"
 
 bool mat_is_null(const mat *m)
 {
@@ -165,13 +165,13 @@ mat *mat_assign(mat *m_dst, const mat *m_src)
     assert(m_dst->d1 == m_src->d1);
     assert(m_dst->d2 == m_src->d2);
 
-    FLT_TYP *arr_dst = payload_at(m_dst->pyl, m_dst->offset);
-    FLT_TYP *arr_src = payload_at(m_src->pyl, m_src->offset);
+    FLD_TYP *arr_dst = payload_at(m_dst->pyl, m_dst->offset);
+    FLD_TYP *arr_src = payload_at(m_src->pyl, m_src->offset);
 
     if (arr_dst == arr_src)
         return m_dst;
 
-    memcpy(arr_dst, arr_src, m_dst->size * sizeof(FLT_TYP));
+    memcpy(arr_dst, arr_src, m_dst->size * sizeof(FLD_TYP));
 
     // payload_copy(m_dst->pyl, m_dst->offset, m_src->pyl, m_src->offset, m_dst->size);
 
@@ -182,12 +182,12 @@ mat *mat_fill_zero(mat *m)
 {
     assert(mat_is_valid(m));
 
-    memset(payload_at(m->pyl, m->offset), 0, m->size * sizeof(FLT_TYP));
+    memset(payload_at(m->pyl, m->offset), 0, m->size * sizeof(FLD_TYP));
 
     return m;
 }
 
-mat *mat_fill_rnd(mat *m, FLT_TYP (*rnd)(void))
+mat *mat_fill_rnd(mat *m, FLD_TYP (*rnd)(void))
 {
     assert(mat_is_valid(m));
     assert(rnd);
@@ -198,7 +198,7 @@ mat *mat_fill_rnd(mat *m, FLT_TYP (*rnd)(void))
     return m;
 }
 
-mat *mat_fill_gen(mat *m, FLT_TYP (*gen)(const void *param), const void *param)
+mat *mat_fill_gen(mat *m, FLD_TYP (*gen)(const void *param), const void *param)
 {
     assert(mat_is_valid(m));
     assert(gen);
@@ -235,7 +235,7 @@ char *mat_to_str(const mat *m, char *m_str)
     return m_str;
 }
 
-mat *mat_update(mat *m_trg, FLT_TYP alpha, const mat *m_right)
+mat *mat_update(mat *m_trg, FLD_TYP alpha, const mat *m_right)
 {
     assert(mat_is_valid(m_trg));
     assert(mat_is_valid(m_right));
@@ -249,7 +249,7 @@ mat *mat_update(mat *m_trg, FLT_TYP alpha, const mat *m_right)
     return m_trg;
 }
 
-FLT_TYP *mat_at(const mat *m, IND_TYP i, IND_TYP j)
+FLD_TYP *mat_at(const mat *m, IND_TYP i, IND_TYP j)
 {
     assert(mat_is_valid(m));
 
@@ -278,14 +278,14 @@ IND_TYP mat_insert(mat *trg, const mat *src, IND_TYP row_i)
     IND_TYP nbr_rows_replaced = MIN(src->d1, trg->d1 - row_i);
     memcpy(payload_at(trg->pyl, trg->offset + row_i * trg->d2),
            payload_at(src->pyl, src->offset),
-           nbr_rows_replaced * src->d2 * sizeof(FLT_TYP));
+           nbr_rows_replaced * src->d2 * sizeof(FLD_TYP));
     return nbr_rows_replaced;
 }
 
 size_t mat_serial_size(const mat *m)
 {
     assert(mat_is_valid(m));
-    return sizeof(size_t) + sizeof(m->d1) + sizeof(m->d2) + m->size * sizeof(FLT_TYP);
+    return sizeof(size_t) + sizeof(m->d1) + sizeof(m->d2) + m->size * sizeof(FLD_TYP);
 }
 
 uint8_t *mat_serialize(const mat *m, uint8_t *byte_arr)
@@ -304,7 +304,7 @@ uint8_t *mat_serialize(const mat *m, uint8_t *byte_arr)
     sz = sizeof(m->d2);
     memcpy(byte_arr, &m->d2, sz);
     byte_arr += sz;
-    sz = m->size * sizeof(FLT_TYP);
+    sz = m->size * sizeof(FLD_TYP);
     memcpy(byte_arr, payload_at(m->pyl, m->offset), sz);
     byte_arr += sz;
     return byte_arr;
@@ -325,7 +325,7 @@ const uint8_t *mat_deserialize(mat *m, const uint8_t *byte_arr)
     memcpy(&d2, byte_arr, sz);
     byte_arr += sz;
     mat_construct(m, d1, d2);
-    sz = m->size * sizeof(FLT_TYP);
+    sz = m->size * sizeof(FLD_TYP);
     memcpy(payload_at(m->pyl, 0), byte_arr, sz);
     byte_arr += sz;
     return byte_arr;
@@ -401,11 +401,11 @@ FLT_TYP mat_norm_2(const mat *m)
     return NRM2(m->size, payload_at(m->pyl, m->offset), 1);
 }
 
-FLT_TYP mat_sum(const mat *m)
+FLD_TYP mat_sum(const mat *m)
 {
     assert(mat_is_valid(m));
 
-    FLT_TYP one = 1;
+    FLD_TYP one = 1;
     return DOT(m->size, payload_at(m->pyl, m->offset), 1, &one, 0);
 }
 
@@ -455,7 +455,7 @@ mat *mat_addto(mat *m_target, const mat *m_right)
     return mat_add(m_target, m_target, m_right);
 }
 
-mat *mat_f_addto(mat *m, FLT_TYP f)
+mat *mat_f_addto(mat *m, FLD_TYP f)
 {
     assert(mat_is_valid(m));
 
@@ -473,7 +473,7 @@ mat *mat_subfrom(mat *m_target, const mat *m_right)
     return mat_sub(m_target, m_target, m_right);
 }
 
-mat *mat_scale(mat *m, FLT_TYP scale)
+mat *mat_scale(mat *m, FLD_TYP scale)
 {
     assert(mat_is_valid(m));
 
@@ -532,7 +532,7 @@ mat *mat_T(mat *m)
     return m;
 }
 
-bool mat_is_close(const mat *m_1, const mat *m_2, FLT_TYP eps)
+bool mat_is_close(const mat *m_1, const mat *m_2, FLD_TYP eps)
 {
     assert(mat_is_valid(m_1));
     assert(mat_is_valid(m_2));
@@ -542,7 +542,7 @@ bool mat_is_close(const mat *m_1, const mat *m_2, FLT_TYP eps)
         return false;
     if (payload_at(m_1->pyl, m_1->offset) == payload_at(m_2->pyl,  m_2->offset))
         return true;
-    FLT_TYP nrm_ratio = mat_norm_2(m_1);
+    FLD_TYP nrm_ratio = mat_norm_2(m_1);
     nrm_ratio += mat_norm_2(m_2);
     if (nrm_ratio == 0)
         return true;

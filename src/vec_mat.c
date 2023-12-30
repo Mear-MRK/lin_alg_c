@@ -2,7 +2,7 @@
 
 #include <assert.h>
 
-#include "blaseng.h"
+#include "vector_eng.h"
 
 vec *mat_dot_vec(vec *target, const mat *ml, const vec *vr)
 {
@@ -54,7 +54,7 @@ mat *vec_outer(mat *target, const vec *v_left, const vec *v_right)
     return target;
 }
 
-mat *mat_update_outer(mat *target, FLT_TYP alpha, const vec *v_left, const vec *v_right)
+mat *mat_update_outer(mat *target, FLD_TYP alpha, const vec *v_left, const vec *v_right)
 {
     assert(mat_is_valid(target));
     assert(vec_is_valid(v_left));

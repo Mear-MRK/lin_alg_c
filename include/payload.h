@@ -17,7 +17,7 @@
  */
 typedef struct payload
 {
-    FLT_TYP *arr;
+    FLD_TYP *arr;
     size_t size;
     int ref_count;
     uint32_t flags;
@@ -57,7 +57,7 @@ static inline bool payload_is_valid(const payload *pyl)
 /**
  * Constructs a new payload.
  *
- * Allocates a FLT_TYP array with the given size and returns a pointer to the payload.
+ * Allocates a FLD_TYP array with the given size and returns a pointer to the payload.
  * The returned payload has its reference count set to 1 and RESIZABLE and SHRINKABLE flags set.
  *
  * @param pyl Pointer to allocate the payload at.
@@ -79,7 +79,7 @@ payload *payload_construct(payload *pyl, size_t size);
 payload *payload_new(size_t size);
 
 
-payload *payload_prealloc(payload *pyl, FLT_TYP *arr, size_t size);
+payload *payload_prealloc(payload *pyl, FLD_TYP *arr, size_t size);
 
 /**
  * Increases the reference count of the given payload by 1.
@@ -129,7 +129,7 @@ size_t payload_copy(payload *dest, size_t dest_off, const payload *src, size_t s
 
 size_t payload_clear_value(payload *trg, size_t offset, size_t end);
 
-static inline FLT_TYP *payload_at(payload *pyl, IND_TYP i)
+static inline FLD_TYP *payload_at(payload *pyl, IND_TYP i)
 {
     assert(i >= 0 && (size_t)i < pyl->size);
     return pyl->arr + i;

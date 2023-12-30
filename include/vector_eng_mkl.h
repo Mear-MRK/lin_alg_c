@@ -1,15 +1,12 @@
-#ifndef BLASENG_MKL_H_INCLUDED
-#define BLASENG_MKL_H_INCLUDED 1
+#ifndef vector_eng_MKL_H_INCLUDED
+#define vector_eng_MKL_H_INCLUDED 1
 
-#ifdef INT64
+#ifdef IND_INT64
 #define MKL_ILP64 1
 #endif
 #include "mkl.h"
-// #define ALIGNED_MALLOC(sz) mkl_malloc(sz, 64)
-// #define ALIGNED_CALLOC(nbr, sz) mkl_calloc(nbr, sz, 64)
-// #define ALIGNED_FREE(ptr) mkl_free(ptr)
 
-#ifdef FLT32
+#ifdef FLD_FLT32
 #define COPY cblas_scopy
 #define DOT cblas_sdot
 #define GEMV cblas_sgemv
@@ -41,7 +38,7 @@
 #define OMAT mkl_somatcopy
 #define IMAT mkl_simatcopy
 #define VCOPYSIGNI vsCopySignI
-#elif defined(FLT64)
+#elif defined(FLD_FLT64)
 #define COPY cblas_dcopy
 #define DOT cblas_ddot
 #define GEMV cblas_dgemv
@@ -75,4 +72,4 @@
 #define VCOPYSIGNI vdCopySignI
 #endif 
 
-#endif /* BLASENG_MKL_H_INCLUDED */
+#endif /* vector_eng_MKL_H_INCLUDED */

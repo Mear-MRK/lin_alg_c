@@ -15,9 +15,9 @@ void vec_mat_test(void)
 
     mat_construct(&m, 2, 3);
 
-    FLT_TYP vr_arr[] = {-10 , 1, -10, -1, -10, 2, -10};
+    FLD_TYP vr_arr[] = {-10 , 1, -10, -1, -10, 2, -10};
     payload pyl_r;
-    FLT_TYP vl_arr[] = {-1, 10, 2};
+    FLD_TYP vl_arr[] = {-1, 10, 2};
     payload pyl_l;
 
     payload_prealloc(&pyl_r, vr_arr, 7);
@@ -25,7 +25,7 @@ void vec_mat_test(void)
     payload_prealloc(&pyl_l, vl_arr, 3);
     vec_construct_prealloc(&vl, &pyl_l, 0, 2, 2);
     // vec_construct(&vl, 2);
-    // vec_copy_arr(&vl, (FLT_TYP[]){-1, 2} );
+    // vec_copy_arr(&vl, (FLD_TYP[]){-1, 2} );
 
     vec_construct(&res_2, 2);
     vec_fill_zero(&res_2);

@@ -4,14 +4,14 @@
 #include <stdlib.h>
 #include <time.h>
 
-#include "blaseng.h"
+#include "vector_eng.h"
 
-static FLT_TYP rnd(void)
+static FLD_TYP rnd(void)
 {
-    return 2*rand()/(FLT_TYP)RAND_MAX - 1;
+    return 2*rand()/(FLD_TYP)RAND_MAX - 1;
 }
 
-static inline FLT_TYP* arr_lin_fill(FLT_TYP* arr, FLT_TYP start, FLT_TYP end, IND_TYP sz)
+static inline FLD_TYP* arr_lin_fill(FLD_TYP* arr, FLD_TYP start, FLD_TYP end, IND_TYP sz)
 {
     if (!arr || sz == 0)
         return arr;
@@ -21,7 +21,7 @@ static inline FLT_TYP* arr_lin_fill(FLT_TYP* arr, FLT_TYP start, FLT_TYP end, IN
         arr[0] = start;
         return arr;
     }
-    FLT_TYP dlt = (end - start) / (sz-1);
+    FLD_TYP dlt = (end - start) / (sz-1);
     for(IND_TYP i = 0; i < sz; i++)
         arr[i] = start + i * dlt;
     return arr;
@@ -29,9 +29,9 @@ static inline FLT_TYP* arr_lin_fill(FLT_TYP* arr, FLT_TYP start, FLT_TYP end, IN
 
 static vec *vec_sigmoid_alt(vec *result, const vec *v)
 {
-    vec_tanh(result, vec_sclmul(result, v, (FLT_TYP)0.5));
+    vec_tanh(result, vec_sclmul(result, v, (FLD_TYP)0.5));
     vec_f_addto(result, 1);
-    vec_scale(result, (FLT_TYP)0.5);
+    vec_scale(result, (FLD_TYP)0.5);
     return result;
 }
 
@@ -110,12 +110,12 @@ void fill_vec_test(void)
     vec_construct(&v2, sz);
     
     clock_t start = clock();
-    for(FLT_TYP f = 0; f < 1000000; f+=1.0001)
+    for(FLD_TYP f = 0; f < 1000000; f+=1.0001)
         vec_fill(&v1, f);
     clock_t end = clock();
     printf("    fill: %g\n", (end-start)/(double)CLOCKS_PER_SEC);
     // start = clock();
-    // // for(FLT_TYP f = 0; f < 1000000; f+=1.0001)
+    // // for(FLD_TYP f = 0; f < 1000000; f+=1.0001)
     // //     vec_fill_altimp(&v2, f);
     // end = clock();
     // printf("rec_fill: %g\n", (end-start)/(double)CLOCKS_PER_SEC);
@@ -141,10 +141,10 @@ void vec_test(void)
 
 
     vec_construct(&va, 3);
-    vec_copy_arr(&va, (FLT_TYP[]){1, 2, 3});
+    vec_copy_arr(&va, (FLD_TYP[]){1, 2, 3});
     // vec_construct(&vb, 3);
     payload pyl_b;
-    payload_prealloc(&pyl_b, (FLT_TYP[]){-10, -1, -10, 1, -10, 2, -10}, 7);
+    payload_prealloc(&pyl_b, (FLD_TYP[]){-10, -1, -10, 1, -10, 2, -10}, 7);
     vec_construct_prealloc(&vb, &pyl_b, 1, 3, 2);
 
     printf("va: %s, norm2: %g, norm1: %g, sum: %g\n", vec_to_str(&va, str_buff)

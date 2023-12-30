@@ -6,7 +6,7 @@
 #include <assert.h>
 
 
-static FLT_TYP *arr_lin_fill(FLT_TYP *arr, FLT_TYP start, FLT_TYP end, IND_TYP sz)
+static FLD_TYP *arr_lin_fill(FLD_TYP *arr, FLD_TYP start, FLD_TYP end, IND_TYP sz)
 {
     if (!arr || sz == 0)
         return arr;
@@ -16,7 +16,7 @@ static FLT_TYP *arr_lin_fill(FLT_TYP *arr, FLT_TYP start, FLT_TYP end, IND_TYP s
         arr[0] = start;
         return arr;
     }
-    FLT_TYP dlt = (end - start) / (sz - 1);
+    FLD_TYP dlt = (end - start) / (sz - 1);
     for (IND_TYP i = 0; i < sz; i++)
         arr[i] = start + i * dlt;
     return arr;
@@ -24,7 +24,7 @@ static FLT_TYP *arr_lin_fill(FLT_TYP *arr, FLT_TYP start, FLT_TYP end, IND_TYP s
 
 void mat_transposition_test(void)
 {
-    FLT_TYP arr[6] = {11, 12, 13, 21, 22, 23};
+    FLD_TYP arr[6] = {11, 12, 13, 21, 22, 23};
     payload pyl = payload_NULL;
     payload_prealloc(&pyl, arr, 6);
     // assert(payload_is_valid(&pyl));

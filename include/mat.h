@@ -3,8 +3,8 @@
 #include <stdbool.h>
 #include <stddef.h>
 
-#include "payload.h"
 #include "lin_alg_config.h"
+#include "payload.h"
 
 typedef struct mat
 {
@@ -41,9 +41,9 @@ mat *mat_assign(mat *m_dst, const mat *m_src);
 
 mat *mat_fill_zero(mat *m);
 
-mat *mat_fill_rnd(mat *m, FLT_TYP (*rnd)(void));
+mat *mat_fill_rnd(mat *m, FLD_TYP (*rnd)(void));
 
-mat *mat_fill_gen(mat *m, FLT_TYP (*gen)(const void *param), const void *param);
+mat *mat_fill_gen(mat *m, FLD_TYP (*gen)(const void *param), const void *param);
 
 mat *mat_add(mat *result, const mat *m_left, const mat *m_right);
 
@@ -57,13 +57,13 @@ mat *mat_dot(mat *result, const mat *m_left, const mat *m_right);
 
 mat *mat_addto(mat *m_target, const mat *m_right);
 // m += f
-mat *mat_f_addto(mat *m, FLT_TYP f);
+mat *mat_f_addto(mat *m, FLD_TYP f);
 
 mat *mat_subfrom(mat *m_target, const mat *m_right);
 
 mat *mat_mulby(mat *m_target, const mat *m_right);
 
-mat *mat_scale(mat *m, FLT_TYP scale);
+mat *mat_scale(mat *m, FLD_TYP scale);
 // result = m^2 (element-wise)
 mat *mat_square(mat *result, const mat *m);
 // result = sqrt(m)
@@ -75,17 +75,17 @@ mat *mat_T(mat *m);
 
 FLT_TYP mat_norm_2(const mat *m);
 
-FLT_TYP mat_sum(const mat *m);
+FLD_TYP mat_sum(const mat *m);
 
-bool mat_is_close(const mat *m_1, const mat *m_2, FLT_TYP eps);
-// mat *mat_fill(mat *m, FLT_TYP value);
+bool mat_is_close(const mat *m_1, const mat *m_2, FLD_TYP eps);
+// mat *mat_fill(mat *m, FLD_TYP value);
 // mat *mat_diag_init(mat *m, const vec *v);
 
 char *mat_to_str(const mat *m, char *str_buff);
 // trg += alpha * m_right
-mat *mat_update(mat *trg, FLT_TYP alpha, const mat *m_right);
+mat *mat_update(mat *trg, FLD_TYP alpha, const mat *m_right);
 // Gives pointer to m->ply->arr[i][j]; i or j can be negative
-FLT_TYP *mat_at(const mat *m, IND_TYP i, IND_TYP j);
+FLD_TYP *mat_at(const mat *m, IND_TYP i, IND_TYP j);
 // Replace trg at specified row i and below with src and returns nbr of rows replaced
 IND_TYP mat_insert(mat *trg, const mat *src, IND_TYP row_i);
 

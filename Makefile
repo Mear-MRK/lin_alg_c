@@ -46,19 +46,19 @@ all: debug release test
 
 $(OBJPATH)/%_flt32.o: $(SRCPATH)/%.c $(HFILES)
 	@mkdir -p $(OBJPATH)
-	$(CC) $(RLS_CFLAGS) -DFLT32=32 -o $@ -c $<
+	$(CC) $(RLS_CFLAGS) -DFLD_FLT32=32 -o $@ -c $<
 
 $(OBJPATH)/%_flt64.o: $(SRCPATH)/%.c $(HFILES)
 	@mkdir -p $(OBJPATH)
-	$(CC) $(RLS_CFLAGS) -DFLT64=64 -o $@ -c $<
+	$(CC) $(RLS_CFLAGS) -DFLD_FLT64=64 -o $@ -c $<
 
 $(OBJPATH)/%_flt32_dbg.o: $(SRCPATH)/%.c $(HFILES)
 	@mkdir -p $(OBJPATH)
-	$(CC) $(DBG_CFLAGS) -DFLT32=32 -o $@ -c $<
+	$(CC) $(DBG_CFLAGS) -DFLD_FLT32=32 -o $@ -c $<
 
 $(OBJPATH)/%_flt64_dbg.o: $(SRCPATH)/%.c $(HFILES)
 	@mkdir -p $(OBJPATH)
-	$(CC) $(DBG_CFLAGS) -DFLT64=64 -o $@ -c $<
+	$(CC) $(DBG_CFLAGS) -DFLD_FLT64=64 -o $@ -c $<
 
 $(LIBPATH)/lib$(RLS_FLT32_LIB).a: $(RLS_FLT32_OBJS)
 	@mkdir -p $(LIBPATH)
@@ -95,9 +95,9 @@ test: $(BINPATH)/$(DBG_FLT32_LIB)_test.out $(BINPATH)/$(DBG_FLT64_LIB)_test.out
 
 run_test: test
 	$(BINPATH)/$(DBG_FLT32_LIB)_test.out
-	@echo "****** FLT32 finished ******"
+	@echo "****** FLD_FLT32 finished ******"
 	$(BINPATH)/$(DBG_FLT64_LIB)_test.out
-	@echo "****** FLT64 finished ******"
+	@echo "****** FLD_FLT64 finished ******"
 	@echo "====== make run_test ======"
 
 install: release debug
